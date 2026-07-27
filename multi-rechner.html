@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AITECH – Multi-Konto-Rechner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script>
+  try { if (localStorage.getItem('aitech-theme') === 'light') document.documentElement.classList.add('theme-light'); } catch (e) {}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #070806;
+    --bg-2:      #0b0d09;
+    --card:      #10130c;
+    --card-2:    #141810;
+    --line:      rgba(230,240,210,0.09);
+    --line-soft: rgba(230,240,210,0.05);
+    --lime:      #c9f24b;
+    --lime-soft: #a8cf3a;
+    --lime-dim:  rgba(201,242,75,0.12);
+    --gold:      #e3c26b;
+    --gold-deep: #b8964a;
+    --red:       #ff7a6b;
+    --text:      #f2f4ea;
+    --muted:     #a9b09a;
+    --faint:     #6d7462;
+    --lime-text: #c9f24b;
+    --gold-text: #e3c26b;
+    --silver:    #9fb4c8;
+    --hover-tint: rgba(230,240,210,0.06);
+    --nav-bg:    rgba(7,8,6,0.82);
+    --input-bg:  #0b0d09;
+    --radius:    22px;
+    --radius-sm: 14px;
+    --font-d:    'Space Grotesk', system-ui, sans-serif;
+    --font-b:    'Inter', system-ui, sans-serif;
+    --font-m:    'JetBrains Mono', monospace;
+  }
+  html.theme-light {
+    --bg:        #eef0ea;
+    --bg-2:      #e2e5dc;
+    --card:      #fafbf8;
+    --card-2:    #f2f4ee;
+    --line:      rgba(23,26,18,0.12);
+    --line-soft: rgba(23,26,18,0.07);
+    --lime-dim:  rgba(140,175,30,0.14);
+    --gold:      #b8944a;
+    --gold-deep: #8a6b32;
+    --red:       #d84a35;
+    --text:      #171a12;
+    --muted:     #565c4c;
+    --faint:     #7e8374;
+    --lime-text: #5f7d0d;
+    --gold-text: #8a6b32;
+    --silver:    #4f6e8a;
+    --hover-tint: rgba(23,26,18,0.05);
+    --nav-bg:    rgba(248,249,246,0.85);
+    --input-bg:  #ffffff;
+  }
+
+  html { scroll-behavior: smooth; }
+  ::selection { background: var(--lime); color: #0a0c05; }
+  body {
+    font-family: var(--font-b);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 15px;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  h1 { font-family: var(--font-d); letter-spacing: -0.02em; font-size: clamp(1.9rem, 4.5vw, 3rem); font-weight: 700; line-height: 1.1; }
+  .accent { color: var(--lime-text); }
+  .accent-gold { color: var(--gold-text); }
+
+  .label {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--lime-text);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .label::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--lime); box-shadow: 0 0 10px var(--lime);
+  }
+
+  /* ── NAV (wie Hauptseite) ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    padding: 0 28px;
+    background: var(--nav-bg);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .nav-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 76px; gap: 24px;
+  }
+  .nav-logo {
+    display: flex; align-items: center; text-decoration: none; flex-shrink: 0;
+    background: #0d0f14; padding: 4px 10px; border-radius: 8px;
+    border: 1px solid var(--line-soft);
+  }
+  .logo-img { height: 28px; display: block; }
+  .nav-links { display: flex; gap: 4px; }
+  .nav-links a {
+    padding: 9px 18px; border-radius: 100px;
+    color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500;
+    transition: color .25s, background .25s;
+  }
+  .nav-links a:hover { color: var(--text); background: var(--hover-tint); }
+  .nav-links a.active { color: var(--lime-text); background: var(--lime-dim); }
+  .nav-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .theme-toggle {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: transparent; border: 1px solid var(--line);
+    color: var(--text); cursor: pointer; padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: border-color .25s, color .25s, transform .3s cubic-bezier(.22,1,.36,1);
+  }
+  .theme-toggle:hover { border-color: var(--lime); color: var(--lime-text); transform: rotate(18deg) scale(1.06); }
+  .theme-toggle .ico-moon { display: none; }
+  html.theme-light .theme-toggle .ico-sun { display: none; }
+  html.theme-light .theme-toggle .ico-moon { display: block; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 11px 24px; border-radius: 100px;
+    font-family: var(--font-b); font-size: 14px; font-weight: 600;
+    cursor: pointer; text-decoration: none;
+    transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s;
+    border: 1px solid transparent; white-space: nowrap;
+  }
+  .btn-primary { background: var(--lime); color: #0a0c05; }
+  .btn-primary:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 12px 40px rgba(201,242,75,0.28); }
+
+  /* ── Page header ── */
+  .page-head { text-align: center; padding: 128px 0 34px; }
+  .page-head .label { margin-bottom: 16px; }
+  .page-head p { color: var(--muted); font-size: 15px; margin-top: 12px; }
+
+  .calc-tabs { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 22px 0 0; }
+  .calc-tabs a {
+    padding: 8px 18px; border-radius: 100px; font-size: 13px; font-weight: 600;
+    text-decoration: none; border: 1px solid var(--line); color: var(--muted);
+    transition: color .25s, border-color .25s, background .25s;
+    font-family: var(--font-m);
+  }
+  .calc-tabs a:hover { color: var(--text); border-color: var(--lime); }
+  .calc-tabs a.active { background: var(--lime-dim); border-color: rgba(201,242,75,0.4); color: var(--lime-text); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 18px 20px;
+    margin-bottom: 14px;
+  }
+  .card-title {
+    font-size: 11px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.12em;
+    margin-bottom: 14px; font-family: var(--font-m);
+  }
+
+  /* ── Global bar ── */
+  .global-bar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .gb-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; font-family: var(--font-m); }
+  .gb-range { flex: 1; min-width: 120px; accent-color: var(--lime); }
+  .gb-inp {
+    width: 56px; background: var(--input-bg);
+    border: 1px solid var(--line); border-radius: 8px;
+    padding: 7px 8px; color: var(--text);
+    font-size: 13px; font-weight: 600; font-family: var(--font-m);
+    outline: none; -moz-appearance: textfield; text-align: center;
+  }
+  .gb-inp::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .gb-inp:focus { border-color: var(--lime); }
+  .gb-sep { width: 1px; height: 22px; background: var(--line); }
+
+  /* ── Account grid ── */
+  .acc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 14px; }
+  .acc-card {
+    background: var(--card); border-radius: var(--radius-sm); overflow: hidden;
+    transition: opacity 0.25s; border: 1px solid var(--line);
+  }
+  .acc-card.k1 { border-color: rgba(201,242,75,0.35); }
+  .acc-card.k2 { border-color: rgba(227,194,107,0.35); }
+  .acc-card.k3 { border-color: rgba(159,180,200,0.35); }
+  .acc-card.off { opacity: 0.45; }
+  .acc-card.off .acc-body { pointer-events: none; }
+
+  .acc-head {
+    padding: 11px 15px; display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--line);
+  }
+  .acc-card.k1 .acc-head { background: rgba(201,242,75,0.07); }
+  .acc-card.k2 .acc-head { background: rgba(227,194,107,0.07); }
+  .acc-card.k3 .acc-head { background: rgba(159,180,200,0.07); }
+
+  .acc-name { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; font-family: var(--font-m); }
+  .acc-card.k1 .acc-name { color: var(--lime-text); }
+  .acc-card.k2 .acc-name { color: var(--gold-text); }
+  .acc-card.k3 .acc-name { color: var(--silver); }
+
+  .acc-tag {
+    font-size: 9px; padding: 3px 8px; border-radius: 100px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.06em; font-family: var(--font-m);
+  }
+  .acc-card.k1 .acc-tag { background: var(--lime-dim); color: var(--lime-text); }
+  .acc-card.k2 .acc-tag { background: rgba(227,194,107,0.14); color: var(--gold-text); }
+  .acc-card.k3 .acc-tag { background: rgba(159,180,200,0.14); color: var(--silver); }
+
+  /* ── Toggle ── */
+  .tog { position: relative; width: 34px; height: 19px; flex-shrink: 0; }
+  .tog input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .tog-sl { position: absolute; inset: 0; background: var(--line); border-radius: 19px; cursor: pointer; transition: background 0.2s; }
+  .tog-sl::before {
+    content: ''; position: absolute; width: 13px; height: 13px;
+    left: 3px; bottom: 3px; background: var(--text); border-radius: 50%;
+    transition: transform 0.2s;
+  }
+  .k2 .tog input:checked + .tog-sl { background: var(--gold); }
+  .k3 .tog input:checked + .tog-sl { background: var(--silver); }
+  .tog input:checked + .tog-sl::before { transform: translateX(15px); background: #0a0c05; }
+
+  .acc-body { padding: 13px 15px; }
+
+  .ir { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .ir-lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; width: 50px; flex-shrink: 0; font-family: var(--font-m); }
+  .ir-inp {
+    flex: 1; min-width: 0; background: var(--input-bg);
+    border: 1px solid var(--line); border-radius: 8px;
+    padding: 7px 9px; color: var(--text);
+    font-size: 13px; font-weight: 600; font-family: var(--font-m);
+    outline: none; -moz-appearance: textfield;
+  }
+  .ir-inp::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .k1 .ir-inp:focus { border-color: var(--lime); }
+  .k2 .ir-inp:focus { border-color: var(--gold); }
+  .k3 .ir-inp:focus { border-color: var(--silver); }
+  .ir-unit { font-size: 11px; color: var(--muted); width: 14px; text-align: right; flex-shrink: 0; }
+
+  .acc-stats { margin-top: 11px; padding-top: 11px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 5px; }
+  .sr { display: flex; justify-content: space-between; align-items: baseline; }
+  .sr-k { font-size: 10px; color: var(--muted); }
+  .sr-v { font-size: 12px; font-weight: 700; font-family: var(--font-m); }
+
+  /* ── Push summary ── */
+  .push-sum { display: none; }
+  .push-sum.on { display: block; }
+  .push-sum-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 10px; font-family: var(--font-m); }
+  .push-chips { display: flex; gap: 10px; flex-wrap: wrap; }
+  .push-chip {
+    background: var(--bg-2); border: 1px solid var(--line);
+    border-radius: 10px; padding: 9px 13px; min-width: 130px;
+  }
+  .push-chip-key { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; font-family: var(--font-m); }
+  .push-chip-val { font-size: 15px; font-weight: 700; font-family: var(--font-m); }
+  .push-chip.total { border-color: rgba(201,242,75,0.4); background: var(--lime-dim); }
+  .push-chip.note { border-color: transparent; background: transparent; font-size: 10px; color: var(--muted); display: flex; align-items: center; max-width: 260px; }
+
+  /* ── KPI ── */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
+  .kpi-card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius-sm); padding: 14px 15px; text-align: center;
+  }
+  .kpi-card.hl { border-color: rgba(201,242,75,0.4); background: var(--lime-dim); }
+  .kpi-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; font-family: var(--font-m); }
+  .kpi-mt5 { font-size: 16px; font-weight: 700; color: var(--lime-text); margin: 5px 0 2px; font-family: var(--font-m); }
+  .kpi-real { font-size: 10px; color: var(--muted); margin-bottom: 8px; }
+  .kpi-div { border: none; border-top: 1px solid var(--line); margin: 0 0 8px; }
+  .kpi-pr { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
+  .kpi-pr-k { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .kpi-day { font-size: 13px; font-weight: 700; color: var(--lime-text); font-family: var(--font-m); }
+  .kpi-mo { font-size: 13px; font-weight: 700; color: var(--gold-text); font-family: var(--font-m); }
+
+  .chart-wrap { position: relative; height: 300px; }
+
+  /* ── Milestones ── */
+  .ms-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px; }
+  .ms-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 14px 16px; }
+  .ms-t { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; font-family: var(--font-m); }
+  .ms-w { font-size: 16px; font-weight: 700; font-family: var(--font-m); }
+  .ms-w.gold  { color: var(--gold-text); }
+  .ms-w.green { color: var(--lime-text); }
+  .ms-w.blue  { color: var(--silver); }
+  .ms-w.muted { color: var(--muted); font-size: 13px; }
+  .ms-s { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  /* ── Table ── */
+  .tw { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th {
+    text-align: left; padding: 8px 10px; color: var(--muted);
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--line); white-space: nowrap; font-family: var(--font-m);
+  }
+  td { padding: 9px 10px; border-bottom: 1px solid var(--line-soft); white-space: nowrap; font-family: var(--font-m); }
+  tr:last-child td { border-bottom: none; }
+  tr.hlr td { background: var(--lime-dim); }
+
+  .page-foot { text-align: center; font-size: 11px; color: var(--faint); padding: 24px 0 12px; }
+
+  /* ── Footer (wie Hauptseite, kompakt) ── */
+  footer { border-top: 1px solid var(--line-soft); padding: 34px 24px 40px; text-align: center; margin-top: 40px; }
+  .logo-mark { font-family: var(--font-d); font-weight: 700; font-size: 20px; letter-spacing: -0.01em; display: inline-flex; gap: 2px; }
+  .logo-mark .ai { color: var(--lime-text); text-shadow: 0 0 24px rgba(201,242,75,0.5); }
+  .logo-mark .tech { color: var(--text); }
+  .footer-copy { font-size: 12px; color: var(--faint); margin-top: 12px; line-height: 1.7; }
+
+  /* ── Responsive ── */
+  @media (max-width: 860px) {
+    .acc-grid { grid-template-columns: 1fr; }
+    .kpi-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .ms-row { grid-template-columns: 1fr; }
+    .push-chips { flex-direction: column; }
+    .push-chip.note { max-width: 100%; }
+    .chart-wrap { height: 220px; }
+    .nav-links { display: none; }
+    table { min-width: 480px; }
+    .ir-inp { padding: 9px 10px; font-size: 15px; }
+  }
+  @media (max-width: 560px) {
+    nav { padding: 0 12px; }
+    .nav-inner { height: 62px; gap: 10px; }
+    .nav-logo { padding: 3px 8px; }
+    .logo-img { height: 22px; }
+    .nav-right { gap: 8px; }
+    .theme-toggle { width: 36px; height: 36px; }
+    .nav-right .btn { padding: 9px 14px; font-size: 13px; white-space: nowrap; }
+    .page-head { padding-top: 106px; }
+    .gb-sep { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══ -->
+<nav id="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo" aria-label="AITECH">
+      <img src="assets/aitech-logo.jpg" alt="AITECH" class="logo-img">
+    </a>
+    <div class="nav-links">
+      <a href="multi-rechner.html" class="active">Multi-Konto-Rechner</a>
+      <a href="affiliate-rechner.html">Affiliate-Rechner</a>
+    </div>
+    <div class="nav-right">
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Zwischen hellem und dunklem Design wechseln" title="Design wechseln">
+        <svg class="ico-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="ico-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <a href="index.html#jetzt-starten" class="btn btn-primary">Account erstellen</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- ═══ PAGE HEAD ═══ -->
+  <div class="page-head">
+    <div class="label">Rechner · Modellrechnung</div>
+    <h1>Multi-Konto-<span class="accent">Rechner</span></h1>
+    <p>K1 Arbeitskonto · K2 &amp; K3 Push-Konten (Gewinne täglich → K1)</p>
+    <div class="calc-tabs">
+      <a href="index.html">← Übersicht</a>
+      <a href="multi-rechner.html" class="active">📈 Multi-Konto</a>
+      <a href="affiliate-rechner.html">🤝 Affiliate</a>
+    </div>
+  </div>
+
+  <!-- Global: Laufzeit -->
+  <div class="card global-bar">
+    <span class="gb-label">Laufzeit</span>
+    <input type="range" id="sldM" class="gb-range" min="3" max="60" step="1" value="24">
+    <input type="number" id="inpM" class="gb-inp" value="24" min="3" max="60">
+    <span style="font-size:11px; color:var(--muted);">Monate</span>
+    <div class="gb-sep"></div>
+    <span class="gb-label">Handelstage/Mo</span>
+    <input type="number" id="inpTD" class="gb-inp" value="22" min="15" max="23" style="width:48px;">
+  </div>
+
+  <!-- 3 Account cards -->
+  <div class="acc-grid">
+
+    <!-- K1 -->
+    <div class="acc-card k1" id="cK1">
+      <div class="acc-head">
+        <span class="acc-name">K1 — Arbeitskonto</span>
+        <span class="acc-tag">Compound</span>
+      </div>
+      <div class="acc-body">
+        <div class="ir">
+          <span class="ir-lbl">Kapital</span>
+          <input type="number" class="ir-inp" id="k1c" value="1687" min="100" step="100">
+          <span class="ir-unit">$</span>
+        </div>
+        <div class="ir">
+          <span class="ir-lbl">Rendite</span>
+          <input type="number" class="ir-inp" id="k1r" value="15" min="1" max="60" step="0.5">
+          <span class="ir-unit">%</span>
+        </div>
+        <div class="ir">
+          <span class="ir-lbl">Hebel</span>
+          <input type="number" class="ir-inp" id="k1l" value="24" min="1" max="200" step="1">
+          <span class="ir-unit">×</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin:9px 0 6px;padding-top:9px;border-top:1px solid var(--line);">
+          <label class="tog" style="flex-shrink:0;">
+            <input type="checkbox" id="togK1dep">
+            <span class="tog-sl"></span>
+          </label>
+          <span style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;flex:1;font-family:var(--font-m);">Monatl. Zuzahlung real</span>
+        </div>
+        <div class="ir" id="k1depRow" style="display:none;">
+          <span class="ir-lbl">Betrag</span>
+          <input type="number" class="ir-inp" id="k1dep" value="500" min="0" step="100">
+          <span class="ir-unit">$</span>
+        </div>
+        <div class="acc-stats">
+          <div class="sr"><span class="sr-k">MT5 heute</span><span class="sr-v" id="k1mt5" style="color:var(--lime-text);">—</span></div>
+          <div class="sr"><span class="sr-k">Tägl. Eigenprofit</span><span class="sr-v" id="k1day" style="color:var(--lime-text);">—</span></div>
+          <div class="sr"><span class="sr-k">Monatl. Eigenprofit</span><span class="sr-v" id="k1mo" style="color:var(--lime-text);">—</span></div>
+          <div class="sr" id="k1depStatRow" style="display:none;"><span class="sr-k">+ Zuzahlung MT5/Mo</span><span class="sr-v" id="k1depMT5" style="color:var(--gold-text);">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- K2 -->
+    <div class="acc-card k2 off" id="cK2">
+      <div class="acc-head">
+        <span class="acc-name">K2 — Push-Konto 1</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="acc-tag" id="k2tag">Aus</span>
+          <label class="tog">
+            <input type="checkbox" id="togK2">
+            <span class="tog-sl"></span>
+          </label>
+        </div>
+      </div>
+      <div class="acc-body">
+        <div class="ir">
+          <span class="ir-lbl">Kapital</span>
+          <input type="number" class="ir-inp" id="k2c" value="5000" min="100" step="100">
+          <span class="ir-unit">$</span>
+        </div>
+        <div class="ir">
+          <span class="ir-lbl">Rendite</span>
+          <input type="number" class="ir-inp" id="k2r" value="15" min="1" max="60" step="0.5">
+          <span class="ir-unit">%</span>
+        </div>
+        <div class="ir">
+          <span class="ir-lbl">Hebel</span>
+          <input type="number" class="ir-inp" id="k2l" value="24" min="1" max="200" step="1">
+          <span class="ir-unit">×</span>
+        </div>
+        <div class="acc-stats">
+          <div class="sr"><span class="sr-k">MT5</span><span class="sr-v" id="k2mt5" style="color:var(--gold-text);">—</span></div>
+          <div class="sr"><span class="sr-k">Monatl. Ertrag (real $)</span><span class="sr-v" id="k2moReal" style="color:var(--lime-text);">—</span></div>
+          <div class="sr"><span class="sr-k">→ K1 tägl. (real $)</span><span class="sr-v" id="k2day" style="color:var(--lime-text);">—</span></div>
+          <div class="sr"><span class="sr-k">→ K1 monatl. (MT5)</span><span class="sr-v" id="k2mo" style="color:var(--gold-text);">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- K3 -->
+    <div class="acc-card k3 off" id="cK3">
+      <div class="acc-head">
+        <span class="acc-name">K3 — Push-Konto 2</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="acc-tag" id="k3tag">Aus</span>
+          <label class="tog">
+            <input type="checkbox" id="togK3">
+            <span class="tog-sl"></span>
+          </label>
+        </div>
+      </div>
+      <div class="acc-body">
+        <div class="ir">
+          <span class="ir-lbl">Kapital</span>
+          <input type="number" class="ir-inp" id="k3c" value="5000" min="100" step="100">
+          <span class="ir-unit">$</span>
+        </div>
+        <div class="ir">
+          <span class="ir-lbl">Rendite</span>
+          <input type="number" class="ir-inp" id="k3r" value="15" min="1" max="60" step="0.5">
+          <span class="ir-unit">%</span>
+        </div>
+        <div class="ir">
+          <span class="ir-lbl">Hebel</span>
+          <input type="number" class="ir-inp" id="k3l" value="24" min="1" max="200" step="1">
+          <span class="ir-unit">×</span>
+        </div>
+        <div class="acc-stats">
+          <div class="sr"><span class="sr-k">MT5</span><span class="sr-v" id="k3mt5" style="color:var(--silver);">—</span></div>
+          <div class="sr"><span class="sr-k">Monatl. Ertrag (real $)</span><span class="sr-v" id="k3moReal" style="color:var(--lime-text);">—</span></div>
+          <div class="sr"><span class="sr-k">→ K1 tägl. (real $)</span><span class="sr-v" id="k3day" style="color:var(--lime-text);">—</span></div>
+          <div class="sr"><span class="sr-k">→ K1 monatl. (MT5)</span><span class="sr-v" id="k3mo" style="color:var(--gold-text);">—</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Push Summary -->
+  <div class="card push-sum" id="pushSum">
+    <div class="push-sum-title">📤 Push-Konten → K1 Zufluss</div>
+    <div class="push-chips">
+      <div class="push-chip" id="psK2" style="display:none;">
+        <div class="push-chip-key">K2 → K1 tägl. (real)</div>
+        <div class="push-chip-val" id="psK2d" style="color:var(--gold-text);">—</div>
+      </div>
+      <div class="push-chip" id="psK3" style="display:none;">
+        <div class="push-chip-key">K3 → K1 tägl. (real)</div>
+        <div class="push-chip-val" id="psK3d" style="color:var(--silver);">—</div>
+      </div>
+      <div class="push-chip total">
+        <div class="push-chip-key">Gesamt → K1 / Monat (MT5)</div>
+        <div class="push-chip-val" id="psTot" style="color:var(--lime-text);">—</div>
+      </div>
+      <div class="push-chip note">
+        ⚠ Tägliche Einzahlungen in K1 setzen den 30-Tage-Lock täglich zurück — K1-Kapital bleibt dauerhaft gebunden, solange Push läuft.
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-row" id="kpiRow"></div>
+
+  <!-- Chart -->
+  <div class="card">
+    <div class="card-title">📈 K1 MT5-Entwicklung</div>
+    <div class="chart-wrap"><canvas id="myChart"></canvas></div>
+  </div>
+
+  <!-- Milestones -->
+  <div class="ms-row" id="msRow"></div>
+
+  <!-- Table -->
+  <div class="card">
+    <div class="card-title">📋 Detailübersicht</div>
+    <div class="tw">
+      <table>
+        <thead>
+          <tr>
+            <th>Monat</th>
+            <th>K1 allein</th>
+            <th>K1 + Push</th>
+            <th>Tagesertrag</th>
+            <th>Monatl. Ertrag</th>
+            <th>Push-Effekt</th>
+            <th>ZZ-Bonus</th>
+          </tr>
+        </thead>
+        <tbody id="tBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="page-foot">
+    Modellrechnung — vergangene Performance ≠ zukünftige Ergebnisse · SONIC AI MyFXBook #12076857
+  </div>
+
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <span class="logo-mark"><span class="ai">AI</span><span class="tech">TECH</span></span>
+  <p class="footer-copy">Verifiziert auf MyFXBook · FSC Mauritius · © 2026 AITECH<br>Trading ist generell mit Risiken verbunden – ein Totalverlust Deiner Einlage ist grundsätzlich möglich.</p>
+</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+const fmtK = v => '$' + Math.round(v).toLocaleString('de-DE');
+const fmtD = v => '$' + Math.abs(v).toFixed(2).replace('.', ',');
+
+let ch = null;
+
+/* ── Theme toggle ── */
+document.getElementById('theme-toggle').addEventListener('click', function () {
+  var light = document.documentElement.classList.toggle('theme-light');
+  try { localStorage.setItem('aitech-theme', light ? 'light' : 'dark'); } catch (e) {}
+  recalc(); // Chart mit neuen Theme-Farben neu zeichnen
+});
+
+/* ── Theme-abhängige Chart-Farben ── */
+function chartColors() {
+  const cs = getComputedStyle(document.documentElement);
+  const light = document.documentElement.classList.contains('theme-light');
+  return {
+    lime:  cs.getPropertyValue('--lime-text').trim(),
+    gold:  cs.getPropertyValue('--gold-text').trim(),
+    muted: cs.getPropertyValue('--muted').trim(),
+    faint: cs.getPropertyValue('--faint').trim(),
+    grid:  light ? 'rgba(23,26,18,0.08)' : 'rgba(230,240,210,0.07)',
+    tipBg: light ? '#ffffff' : '#10130c',
+    tipBd: light ? 'rgba(23,26,18,0.15)' : 'rgba(230,240,210,0.15)',
+    tipTx: light ? '#171a12' : '#f2f4ea',
+    fill:  light ? 'rgba(140,175,30,0.08)' : 'rgba(201,242,75,0.06)'
+  };
+}
+
+/* ── Wire inputs ── */
+$('sldM').addEventListener('input', () => { $('inpM').value = $('sldM').value; recalc(); });
+$('inpM').addEventListener('input', () => { $('sldM').value = $('inpM').value; recalc(); });
+['inpTD','k1c','k1r','k1l','k1dep','k2c','k2r','k2l','k3c','k3r','k3l'].forEach(id => $(id).addEventListener('input', recalc));
+
+$('togK1dep').addEventListener('change', () => {
+  const on = $('togK1dep').checked;
+  $('k1depRow').style.display     = on ? '' : 'none';
+  $('k1depStatRow').style.display = on ? '' : 'none';
+  $('togK1dep').closest('label').querySelector('.tog-sl').style.background = on ? 'var(--lime)' : '';
+  recalc();
+});
+
+/* ── Toggles ── */
+$('togK2').addEventListener('change', () => {
+  const on = $('togK2').checked;
+  $('cK2').classList.toggle('off', !on);
+  $('k2tag').textContent = on ? 'Push aktiv' : 'Aus';
+  recalc();
+});
+$('togK3').addEventListener('change', () => {
+  const on = $('togK3').checked;
+  $('cK3').classList.toggle('off', !on);
+  $('k3tag').textContent = on ? 'Push aktiv' : 'Aus';
+  recalc();
+});
+
+/* ── Core compute ── */
+function compute() {
+  const N  = Math.max(1, parseInt($('inpM').value) || 24);
+  const TD = Math.max(1, parseInt($('inpTD').value) || 22);
+
+  const k1Cap = Math.max(100, parseFloat($('k1c').value) || 1687);
+  const k1Rt  = Math.max(0.001, parseFloat($('k1r').value) || 15) / 100;
+  const k1Lv  = Math.max(1, parseFloat($('k1l').value) || 24);
+
+  const k2On  = $('togK2').checked;
+  const k2Cap = k2On ? Math.max(0, parseFloat($('k2c').value) || 0) : 0;
+  const k2Rt  = k2On ? Math.max(0, parseFloat($('k2r').value) || 15) / 100 : 0;
+  const k2Lv  = Math.max(1, parseFloat($('k2l').value) || 24);
+
+  const k3On  = $('togK3').checked;
+  const k3Cap = k3On ? Math.max(0, parseFloat($('k3c').value) || 0) : 0;
+  const k3Rt  = k3On ? Math.max(0, parseFloat($('k3r').value) || 15) / 100 : 0;
+  const k3Lv  = Math.max(1, parseFloat($('k3l').value) || 24);
+
+  const k1DepOn    = $('togK1dep').checked;
+  const k1DepReal  = k1DepOn ? (Math.max(0, parseFloat($('k1dep').value) || 0)) : 0;
+  const k1DepMT5mo = k1DepReal * k1Lv;
+
+  const r_day = k1Rt / TD;
+  const rd    = k1Rt / k1Lv / TD;
+  const M0    = k1Cap * k1Lv;
+
+  const k2PushMT5mo  = k2Cap * k2Rt * k1Lv;
+  const k3PushMT5mo  = k3Cap * k3Rt * k1Lv;
+  const totPushMT5mo = k2PushMT5mo + k3PushMT5mo + k1DepMT5mo;
+  const totPushDayMT5 = totPushMT5mo / TD;
+
+  const k2PushDayReal = k2Cap * k2Rt / TD;
+  const k3PushDayReal = k3Cap * k3Rt / TD;
+
+  const alone = [], combo = [], dayA = [], dayC = [];
+
+  for (let m = 0; m <= N; m++) {
+    const n = m * TD;
+    const p = Math.pow(1 + r_day, n);
+    const ma = M0 * p;
+    const mc = (totPushMT5mo === 0 || r_day === 0) ? ma
+      : M0 * p + totPushDayMT5 * (p - 1) / r_day;
+
+    alone.push(Math.round(ma));
+    combo.push(Math.round(mc));
+    dayA.push(parseFloat((ma * rd).toFixed(2)));
+    dayC.push(parseFloat((mc * rd).toFixed(2)));
+  }
+
+  return {
+    N, TD, k1Cap, k1Rt, k1Lv, k1DepOn, k1DepReal, k1DepMT5mo,
+    k2On, k2Cap, k2Rt, k2Lv, k3On, k3Cap, k3Rt, k3Lv,
+    r_day, rd, M0,
+    k2PushMT5mo, k3PushMT5mo, totPushMT5mo,
+    k2PushDayReal, k3PushDayReal,
+    alone, combo, dayA, dayC
+  };
+}
+
+/* ── Update card stats ── */
+function updateStats(d) {
+  $('k1mt5').textContent = fmtK(d.M0);
+  $('k1day').textContent = fmtD(d.dayA[0]);
+  $('k1mo').textContent  = fmtD(d.dayA[0] * d.TD);
+  $('k1depMT5').textContent = d.k1DepOn ? fmtK(d.k1DepMT5mo) : '—';
+
+  $('k2mt5').textContent   = d.k2On ? fmtK(d.k2Cap * d.k2Lv) : '—';
+  $('k2moReal').textContent= d.k2On ? fmtD(d.k2PushDayReal * d.TD) : '—';
+  $('k2day').textContent   = d.k2On ? fmtD(d.k2PushDayReal) : '—';
+  $('k2mo').textContent    = d.k2On ? fmtK(d.k2PushMT5mo) : '—';
+
+  $('k3mt5').textContent   = d.k3On ? fmtK(d.k3Cap * d.k3Lv) : '—';
+  $('k3moReal').textContent= d.k3On ? fmtD(d.k3PushDayReal * d.TD) : '—';
+  $('k3day').textContent   = d.k3On ? fmtD(d.k3PushDayReal) : '—';
+  $('k3mo').textContent    = d.k3On ? fmtK(d.k3PushMT5mo) : '—';
+
+  const anyPush = d.k2On || d.k3On;
+  $('pushSum').classList.toggle('on', anyPush);
+  $('psK2').style.display  = d.k2On ? '' : 'none';
+  $('psK3').style.display  = d.k3On ? '' : 'none';
+  $('psK2d').textContent   = fmtD(d.k2PushDayReal);
+  $('psK3d').textContent   = fmtD(d.k3PushDayReal);
+  $('psTot').textContent   = fmtK(d.totPushMT5mo);
+}
+
+/* ── KPI ── */
+function renderKPI(d) {
+  const slots = [0, 6, 12, d.N].filter((v,i,a) => a.indexOf(v)===i).sort((a,b)=>a-b);
+  $('kpiRow').innerHTML = slots.map(m => {
+    const mt5 = d.combo[m] !== undefined ? d.combo[m] : d.combo[d.combo.length - 1];
+    const dy  = d.dayC[m]  !== undefined ? d.dayC[m]  : d.dayC[d.dayC.length - 1];
+    const lbl = m === 0 ? 'Heute' : `Monat ${m}`;
+    const hl  = (m === 12 || m === d.N) && m > 0;
+    const real = Math.round(mt5 / d.k1Lv);
+    return `<div class="kpi-card ${hl?'hl':''}">
+      <div class="kpi-lbl">${lbl}</div>
+      <div class="kpi-mt5">${fmtK(mt5)} <span style="font-size:10px;font-weight:400;color:var(--muted);">MT5</span></div>
+      <div class="kpi-real">= ${fmtK(real)} echtes Kapital</div>
+      <hr class="kpi-div">
+      <div class="kpi-pr"><span class="kpi-pr-k">tägl.</span><span class="kpi-day">${fmtD(dy)}</span></div>
+      <div class="kpi-pr"><span class="kpi-pr-k">monatl.</span><span class="kpi-mo">${fmtD(dy * d.TD)}</span></div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Milestones ── */
+function renderMs(d) {
+  const targets = [
+    { lbl:'$50/Tag',  v:50,  c:'gold'  },
+    { lbl:'$100/Tag', v:100, c:'green' },
+    { lbl:'$300/Tag', v:300, c:'blue'  },
+  ];
+  $('msRow').innerHTML = targets.map(t => {
+    const m   = d.dayC.findIndex(x => x >= t.v);
+    const now = d.dayC[0] >= t.v;
+    const txt = now ? 'Jetzt ✓' : m < 0 ? 'Außerhalb' : `Monat ${m}`;
+    const cls = now ? 'green' : m < 0 ? 'muted' : t.c;
+    const sub = now ? `Aktuell ${fmtD(d.dayC[0])}/Tag`
+              : m < 0 ? `Nicht im ${d.N}-Monats-Zeitraum`
+              : `K1 MT5 ca. ${fmtK(d.combo[m])}`;
+    return `<div class="ms-card">
+      <div class="ms-t">🎯 ${t.lbl}</div>
+      <div class="ms-w ${cls}">${txt}</div>
+      <div class="ms-s">${sub}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Chart ── */
+function renderChart(d) {
+  const labels = Array.from({length: d.N+1}, (_,i) => `M${i}`);
+  const c = chartColors();
+  if (ch) ch.destroy();
+
+  const datasets = [
+    {
+      label: 'K1 allein',
+      data: d.alone,
+      borderColor: c.faint,
+      borderWidth: 1.5,
+      borderDash: [5,4],
+      fill: false, tension: 0,
+      pointRadius: 0, yAxisID: 'y',
+    },
+    {
+      label: 'K1 + Push-Konten',
+      data: d.combo,
+      borderColor: c.gold,
+      backgroundColor: c.fill,
+      borderWidth: 2.5,
+      fill: true, tension: 0.4,
+      pointRadius: 0, yAxisID: 'y',
+    },
+    {
+      label: 'Tagesertrag K1',
+      data: d.dayC,
+      borderColor: c.lime,
+      borderWidth: 2,
+      fill: false, tension: 0.4,
+      pointRadius: 0, yAxisID: 'y2',
+    },
+    {
+      label: '$100/Tag',
+      data: Array(d.N+1).fill(100),
+      borderColor: c.lime + '66',
+      borderWidth: 1, borderDash: [3,4],
+      pointRadius: 0, fill: false, yAxisID: 'y2',
+    },
+    {
+      label: '$300/Tag',
+      data: Array(d.N+1).fill(300),
+      borderColor: c.gold + '66',
+      borderWidth: 1, borderDash: [3,4],
+      pointRadius: 0, fill: false, yAxisID: 'y2',
+    },
+  ];
+
+  try { ch = new Chart($('myChart'), {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { labels: { color: c.muted, font: { size: 10 }, boxWidth: 18, padding: 12 } },
+        tooltip: {
+          backgroundColor: c.tipBg, borderColor: c.tipBd, borderWidth: 1,
+          titleColor: c.tipTx, bodyColor: c.muted, padding: 10,
+          callbacks: {
+            label: ctx => {
+              if (ctx.datasetIndex === 0) return ` K1 allein: ${fmtK(ctx.parsed.y)}`;
+              if (ctx.datasetIndex === 1) return ` K1+Push: ${fmtK(ctx.parsed.y)}`;
+              if (ctx.datasetIndex === 2) return ` Täglich: ${fmtD(ctx.parsed.y)}`;
+              return null;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: c.muted, font: { size: 9 }, maxTicksLimit: 13 },
+          grid:  { color: c.grid }
+        },
+        y: {
+          type: 'linear', position: 'left',
+          ticks: {
+            color: c.gold, font: { size: 9 },
+            callback: v => v >= 1e6 ? '$'+(v/1e6).toFixed(1)+'M' : v >= 1000 ? '$'+Math.round(v/1000)+'k' : '$'+v
+          },
+          grid: { color: c.grid }
+        },
+        y2: {
+          type: 'linear', position: 'right',
+          ticks: { color: c.lime, font: { size: 9 }, callback: v => '$'+v },
+          grid: { display: false }
+        }
+      }
+    }
+  }); } catch(e) { console.warn('Chart init error:', e); }
+}
+
+/* ── Table ── */
+function renderTable(d) {
+  const keys = new Set([0,1,3,6,9,12,15,18,21,24,d.N]);
+  const rows = [...keys].filter(m => m <= d.N).sort((a,b)=>a-b);
+
+  $('tBody').innerHTML = rows.map(m => {
+    const a  = d.alone[m], c = d.combo[m];
+    const dy = d.dayC[m];
+    const push = c - a;
+    const lin  = d.M0 + m * (d.M0 * d.k1Rt + d.totPushMT5mo);
+    const zz   = c - lin;
+    const hl   = [9,12,d.N].includes(m) && m > 0;
+    return `<tr class="${hl?'hlr':''}">
+      <td style="color:var(--muted)">M${m}${m===0?' (Heute)':''}</td>
+      <td style="color:var(--muted)">${fmtK(a)}</td>
+      <td style="color:var(--lime-text);font-weight:600">${fmtK(c)}</td>
+      <td style="color:var(--lime-text)">${fmtD(dy)}</td>
+      <td style="color:var(--gold-text)">${fmtD(dy * d.TD)}</td>
+      <td style="color:${push>100?'var(--gold-text)':'var(--muted)'}">${push>100?'+'+fmtK(push):'—'}</td>
+      <td style="color:${zz>100?'var(--silver)':'var(--muted)'}">${zz>100?'+'+fmtK(zz):'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── Recalc ── */
+function recalc() {
+  const d = compute();
+  updateStats(d);
+  renderKPI(d);
+  renderMs(d);
+  renderChart(d);
+  renderTable(d);
+}
+
+recalc();
+</script>
+</body>
+</html>

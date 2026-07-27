@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AITECH – Affiliate-Rechner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script>
+  try { if (localStorage.getItem('aitech-theme') === 'light') document.documentElement.classList.add('theme-light'); } catch (e) {}
+</script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #070806;
+    --bg-2:      #0b0d09;
+    --card:      #10130c;
+    --card-2:    #141810;
+    --line:      rgba(230,240,210,0.09);
+    --line-soft: rgba(230,240,210,0.05);
+    --lime:      #c9f24b;
+    --lime-soft: #a8cf3a;
+    --lime-dim:  rgba(201,242,75,0.12);
+    --gold:      #e3c26b;
+    --gold-deep: #b8964a;
+    --red:       #ff7a6b;
+    --text:      #f2f4ea;
+    --muted:     #a9b09a;
+    --faint:     #6d7462;
+    --lime-text: #c9f24b;
+    --gold-text: #e3c26b;
+    --silver:    #9fb4c8;
+    --hover-tint: rgba(230,240,210,0.06);
+    --nav-bg:    rgba(7,8,6,0.82);
+    --input-bg:  #0b0d09;
+    --radius:    22px;
+    --radius-sm: 14px;
+    --font-d:    'Space Grotesk', system-ui, sans-serif;
+    --font-b:    'Inter', system-ui, sans-serif;
+    --font-m:    'JetBrains Mono', monospace;
+  }
+  html.theme-light {
+    --bg:        #eef0ea;
+    --bg-2:      #e2e5dc;
+    --card:      #fafbf8;
+    --card-2:    #f2f4ee;
+    --line:      rgba(23,26,18,0.12);
+    --line-soft: rgba(23,26,18,0.07);
+    --lime-dim:  rgba(140,175,30,0.14);
+    --gold:      #b8944a;
+    --gold-deep: #8a6b32;
+    --red:       #d84a35;
+    --text:      #171a12;
+    --muted:     #565c4c;
+    --faint:     #7e8374;
+    --lime-text: #5f7d0d;
+    --gold-text: #8a6b32;
+    --silver:    #4f6e8a;
+    --hover-tint: rgba(23,26,18,0.05);
+    --nav-bg:    rgba(248,249,246,0.85);
+    --input-bg:  #ffffff;
+  }
+
+  html { scroll-behavior: smooth; }
+  ::selection { background: var(--lime); color: #0a0c05; }
+  body {
+    font-family: var(--font-b);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 15px;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+
+  h1 { font-family: var(--font-d); letter-spacing: -0.02em; font-size: clamp(1.9rem, 4.5vw, 3rem); font-weight: 700; line-height: 1.1; }
+  .accent { color: var(--lime-text); }
+  .accent-gold { color: var(--gold-text); }
+
+  .label {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--lime-text);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .label::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--lime); box-shadow: 0 0 10px var(--lime);
+  }
+
+  /* ── NAV (wie Hauptseite) ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    padding: 0 28px;
+    background: var(--nav-bg);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .nav-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 76px; gap: 24px;
+  }
+  .nav-logo {
+    display: flex; align-items: center; text-decoration: none; flex-shrink: 0;
+    background: #0d0f14; padding: 4px 10px; border-radius: 8px;
+    border: 1px solid var(--line-soft);
+  }
+  .logo-img { height: 28px; display: block; }
+  .nav-links { display: flex; gap: 4px; }
+  .nav-links a {
+    padding: 9px 18px; border-radius: 100px;
+    color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500;
+    transition: color .25s, background .25s;
+  }
+  .nav-links a:hover { color: var(--text); background: var(--hover-tint); }
+  .nav-links a.active { color: var(--lime-text); background: var(--lime-dim); }
+  .nav-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .theme-toggle {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: transparent; border: 1px solid var(--line);
+    color: var(--text); cursor: pointer; padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: border-color .25s, color .25s, transform .3s cubic-bezier(.22,1,.36,1);
+  }
+  .theme-toggle:hover { border-color: var(--lime); color: var(--lime-text); transform: rotate(18deg) scale(1.06); }
+  .theme-toggle .ico-moon { display: none; }
+  html.theme-light .theme-toggle .ico-sun { display: none; }
+  html.theme-light .theme-toggle .ico-moon { display: block; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 11px 24px; border-radius: 100px;
+    font-family: var(--font-b); font-size: 14px; font-weight: 600;
+    cursor: pointer; text-decoration: none;
+    transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s;
+    border: 1px solid transparent; white-space: nowrap;
+  }
+  .btn-primary { background: var(--lime); color: #0a0c05; }
+  .btn-primary:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 12px 40px rgba(201,242,75,0.28); }
+
+  /* ── Page header ── */
+  .page-head { text-align: center; padding: 128px 0 34px; }
+  .page-head .label { margin-bottom: 16px; }
+  .page-head p { color: var(--muted); font-size: 15px; margin-top: 12px; }
+
+  .calc-tabs { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 22px 0 0; }
+  .calc-tabs a {
+    padding: 8px 18px; border-radius: 100px; font-size: 13px; font-weight: 600;
+    text-decoration: none; border: 1px solid var(--line); color: var(--muted);
+    transition: color .25s, border-color .25s, background .25s;
+    font-family: var(--font-m);
+  }
+  .calc-tabs a:hover { color: var(--text); border-color: var(--lime); }
+  .calc-tabs a.active { background: var(--lime-dim); border-color: rgba(201,242,75,0.4); color: var(--lime-text); }
+
+  /* ── Section label ── */
+  .sec-label {
+    font-size: 11px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.12em;
+    margin: 26px 0 12px; font-family: var(--font-m);
+  }
+  .sec-label:first-of-type { margin-top: 0; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 18px 20px;
+    margin-bottom: 14px;
+  }
+  .lvl-card.l1 { border-color: rgba(201,242,75,0.35); }
+  .lvl-card.l2 { border-color: rgba(227,194,107,0.35); }
+  .lvl-card.l3 { border-color: rgba(159,180,200,0.35); }
+
+  .card-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px; gap: 10px; flex-wrap: wrap;
+  }
+  .badge {
+    display: inline-block; padding: 3px 11px; border-radius: 100px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+    font-family: var(--font-m); text-transform: uppercase;
+  }
+  .b-lime   { background: var(--lime-dim); color: var(--lime-text); border: 1px solid rgba(201,242,75,0.35); }
+  .b-gold   { background: rgba(227,194,107,0.14); color: var(--gold-text); border: 1px solid rgba(227,194,107,0.35); }
+  .b-silver { background: rgba(159,180,200,0.14); color: var(--silver); border: 1px solid rgba(159,180,200,0.35); }
+
+  .level-name { font-size: 14px; font-weight: 600; margin-left: 10px; }
+  .level-rates { font-size: 11px; color: var(--muted); font-family: var(--font-m); white-space: nowrap; }
+
+  /* ── Slider ── */
+  .sl-row { margin-bottom: 16px; }
+  .sl-row:last-child { margin-bottom: 0; }
+  .sl-meta { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 7px; }
+  .sl-lbl { font-size: 12px; color: var(--muted); }
+  .sl-val { font-size: 16px; font-weight: 700; color: var(--text); font-family: var(--font-m); }
+  .sl-val.hi { color: var(--lime-text); }
+
+  input[type=range] {
+    width: 100%; height: 4px;
+    background: var(--line);
+    border-radius: 2px; outline: none;
+    -webkit-appearance: none; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px; height: 20px;
+    background: var(--lime);
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(201,242,75,0.45);
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 20px; height: 20px; border: none;
+    background: var(--lime); border-radius: 50%;
+    box-shadow: 0 0 12px rgba(201,242,75,0.45);
+  }
+  input[type=range].gold::-webkit-slider-thumb   { background: var(--gold);   box-shadow: 0 0 12px rgba(227,194,107,0.45); }
+  input[type=range].gold::-moz-range-thumb       { background: var(--gold);   box-shadow: 0 0 12px rgba(227,194,107,0.45); }
+  input[type=range].silver::-webkit-slider-thumb { background: var(--silver); box-shadow: 0 0 12px rgba(159,180,200,0.4); }
+  input[type=range].silver::-moz-range-thumb     { background: var(--silver); box-shadow: 0 0 12px rgba(159,180,200,0.4); }
+
+  /* ── Add Level Button ── */
+  .add-btn {
+    width: 100%; padding: 13px;
+    background: transparent;
+    border: 1px dashed rgba(159,180,200,0.4);
+    border-radius: var(--radius-sm);
+    color: var(--silver); font-size: 13px; font-weight: 600;
+    font-family: var(--font-b);
+    cursor: pointer; margin-bottom: 14px;
+    transition: background .2s, border-color .2s;
+  }
+  .add-btn:hover { background: rgba(159,180,200,0.06); border-color: rgba(159,180,200,0.6); }
+
+  /* ── Advanced toggle ── */
+  .adv-toggle {
+    display: flex; align-items: center; gap: 8px;
+    cursor: pointer; padding: 13px 18px;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    user-select: none; transition: background .15s;
+  }
+  .adv-toggle:hover { background: var(--card-2); }
+  .adv-toggle .lbl { font-size: 13px; color: var(--muted); }
+  .adv-toggle .chev { margin-left: auto; color: var(--muted); font-size: 12px; transition: transform .2s; }
+  .adv-toggle.open { border-radius: var(--radius-sm) var(--radius-sm) 0 0; }
+  .adv-toggle.open .chev { transform: rotate(180deg); }
+  .adv-body {
+    display: none;
+    background: var(--card); border: 1px solid var(--line); border-top: none;
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    padding: 18px 18px;
+  }
+  .adv-body.open { display: block; }
+  .adv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 28px; }
+
+  /* ── Result Cards ── */
+  .res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  .res-card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius-sm); padding: 16px 14px; text-align: center;
+  }
+  .res-card.hi { border-color: rgba(201,242,75,0.4); background: var(--lime-dim); }
+  .res-card.cpa-card {
+    grid-column: 1 / -1;
+    display: flex; align-items: center; justify-content: space-between;
+    text-align: left; padding: 14px 18px;
+    border-color: rgba(227,194,107,0.35);
+  }
+  .res-card.cpa-card .res-rlbl { margin-bottom: 0; }
+  .res-card.cpa-card .cpa-right { text-align: right; }
+  .res-rlbl {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
+    color: var(--muted); text-transform: uppercase; margin-bottom: 7px;
+    font-family: var(--font-m);
+  }
+  .res-val { font-size: 26px; font-weight: 700; color: var(--lime-text); line-height: 1; font-family: var(--font-m); }
+  .res-val.sm { font-size: 18px; color: var(--gold-text); }
+  .res-sub { font-size: 11px; color: var(--muted); margin-top: 5px; }
+
+  /* ── Table shared ── */
+  .table-card { padding: 0; overflow: hidden; }
+  .tw { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 460px; }
+  th {
+    text-align: left; padding: 10px 12px; color: var(--muted);
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--line); white-space: nowrap; font-family: var(--font-m);
+  }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--line-soft); white-space: nowrap; font-family: var(--font-m); }
+  tr:last-child td { border-bottom: none; }
+  .tr { text-align: right; }
+  th.tr { text-align: right; }
+  .td-total td { font-weight: 700; color: var(--lime-text); border-top: 1px solid var(--line); border-bottom: none; background: var(--lime-dim); }
+
+  /* ── Projection table ── */
+  .proj-table th, .proj-table td { text-align: center; padding: 9px 8px; }
+  .proj-table th:first-child, .proj-table td:first-child { text-align: left; padding-left: 14px; }
+  .proj-m { color: var(--muted); font-weight: 600; }
+  .proj-hi { color: var(--lime-text); font-weight: 700; }
+  tr.hlr td { background: var(--lime-dim); }
+
+  /* ── Info box ── */
+  .info {
+    background: rgba(227,194,107,0.06);
+    border: 1px solid rgba(227,194,107,0.2);
+    border-radius: var(--radius-sm); padding: 13px 16px;
+    font-size: 12px; color: var(--muted); line-height: 1.65;
+    margin-top: 12px; font-family: var(--font-b);
+  }
+  .info strong { color: var(--gold-text); }
+  .info .lime { color: var(--lime-text); font-weight: 700; }
+
+  /* ── CPA tier bar ── */
+  .cpa-bar { display: flex; gap: 6px; margin: 12px 0 0; overflow-x: auto; padding-bottom: 4px; }
+  .cpa-step {
+    flex: 1; min-width: 72px;
+    padding: 9px 6px; border-radius: 10px;
+    text-align: center; border: 1px solid var(--line);
+    background: var(--card);
+    transition: border-color .2s, background .2s;
+  }
+  .cpa-step .cs-vol { font-size: 9px; color: var(--muted); font-family: var(--font-m); }
+  .cpa-step .cs-rate { font-size: 14px; font-weight: 700; margin-top: 2px; color: var(--muted); font-family: var(--font-m); }
+  .cpa-step.active { border-color: rgba(227,194,107,0.5); background: rgba(227,194,107,0.1); }
+  .cpa-step.active .cs-rate { color: var(--gold-text); }
+
+  .page-foot { text-align: center; font-size: 11px; color: var(--faint); padding: 24px 0 12px; }
+
+  /* ── Footer (wie Hauptseite, kompakt) ── */
+  footer { border-top: 1px solid var(--line-soft); padding: 34px 24px 40px; text-align: center; margin-top: 40px; }
+  .logo-mark { font-family: var(--font-d); font-weight: 700; font-size: 20px; letter-spacing: -0.01em; display: inline-flex; gap: 2px; }
+  .logo-mark .ai { color: var(--lime-text); text-shadow: 0 0 24px rgba(201,242,75,0.5); }
+  .logo-mark .tech { color: var(--text); }
+  .footer-copy { font-size: 12px; color: var(--faint); margin-top: 12px; line-height: 1.7; }
+
+  /* ── Responsive ── */
+  @media (max-width: 860px) {
+    .nav-links { display: none; }
+    .adv-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    nav { padding: 0 12px; }
+    .nav-inner { height: 62px; gap: 10px; }
+    .nav-logo { padding: 3px 8px; }
+    .logo-img { height: 22px; }
+    .nav-right { gap: 8px; }
+    .theme-toggle { width: 36px; height: 36px; }
+    .nav-right .btn { padding: 9px 14px; font-size: 13px; white-space: nowrap; }
+    .page-head { padding-top: 106px; }
+    .res-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .res-val { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══ -->
+<nav id="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo" aria-label="AITECH">
+      <img src="assets/aitech-logo.jpg" alt="AITECH" class="logo-img">
+    </a>
+    <div class="nav-links">
+      <a href="multi-rechner.html">Multi-Konto-Rechner</a>
+      <a href="affiliate-rechner.html" class="active">Affiliate-Rechner</a>
+    </div>
+    <div class="nav-right">
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Zwischen hellem und dunklem Design wechseln" title="Design wechseln">
+        <svg class="ico-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="ico-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <a href="index.html#jetzt-starten" class="btn btn-primary">Account erstellen</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- ═══ PAGE HEAD ═══ -->
+  <div class="page-head">
+    <div class="label">Rechner · Modellrechnung</div>
+    <h1>Affiliate-<span class="accent">Rechner</span></h1>
+    <p>Lot Commission · Performance Share · CPA</p>
+    <div class="calc-tabs">
+      <a href="index.html">← Übersicht</a>
+      <a href="multi-rechner.html">📈 Multi-Konto</a>
+      <a href="affiliate-rechner.html" class="active">🤝 Affiliate</a>
+    </div>
+  </div>
+
+  <!-- ── INPUTS ── -->
+  <div class="sec-label">Netzwerk-Struktur</div>
+
+  <!-- L1 -->
+  <div class="card lvl-card l1">
+    <div class="card-head">
+      <div style="display:flex;align-items:center;">
+        <span class="badge b-lime">L1</span>
+        <span class="level-name">Firstline</span>
+      </div>
+      <span class="level-rates">$2,00/Lot · 2,5% PF</span>
+    </div>
+    <div class="sl-row">
+      <div class="sl-meta">
+        <span class="sl-lbl">Anzahl User</span>
+        <span class="sl-val hi" id="l1u-v">10</span>
+      </div>
+      <input type="range" id="l1u" min="0" max="100" value="10" step="1">
+    </div>
+    <div class="sl-row">
+      <div class="sl-meta">
+        <span class="sl-lbl">Kapital pro User</span>
+        <span class="sl-val" id="l1c-v">€ 2.000</span>
+      </div>
+      <input type="range" id="l1c" min="500" max="50000" value="2000" step="500">
+    </div>
+  </div>
+
+  <!-- L2 -->
+  <div class="card lvl-card l2">
+    <div class="card-head">
+      <div style="display:flex;align-items:center;">
+        <span class="badge b-gold">L2</span>
+        <span class="level-name">2. Ebene</span>
+      </div>
+      <span class="level-rates">$1,50/Lot · 2,5% PF</span>
+    </div>
+    <div class="sl-row">
+      <div class="sl-meta">
+        <span class="sl-lbl">Anzahl User</span>
+        <span class="sl-val hi" id="l2u-v">30</span>
+      </div>
+      <input type="range" class="gold" id="l2u" min="0" max="300" value="30" step="1">
+    </div>
+    <div class="sl-row">
+      <div class="sl-meta">
+        <span class="sl-lbl">Kapital pro User</span>
+        <span class="sl-val" id="l2c-v">€ 2.000</span>
+      </div>
+      <input type="range" class="gold" id="l2c" min="500" max="50000" value="2000" step="500">
+    </div>
+  </div>
+
+  <!-- L3 (hidden) -->
+  <div class="card lvl-card l3" id="card-l3" style="display:none">
+    <div class="card-head">
+      <div style="display:flex;align-items:center;">
+        <span class="badge b-silver">L3</span>
+        <span class="level-name">3. Ebene</span>
+      </div>
+      <span class="level-rates">$1,10/Lot · 2,5% PF</span>
+    </div>
+    <div class="sl-row">
+      <div class="sl-meta">
+        <span class="sl-lbl">Anzahl User</span>
+        <span class="sl-val hi" id="l3u-v">0</span>
+      </div>
+      <input type="range" class="silver" id="l3u" min="0" max="500" value="0" step="1">
+    </div>
+    <div class="sl-row">
+      <div class="sl-meta">
+        <span class="sl-lbl">Kapital pro User</span>
+        <span class="sl-val" id="l3c-v">€ 2.000</span>
+      </div>
+      <input type="range" class="silver" id="l3c" min="500" max="50000" value="2000" step="500">
+    </div>
+  </div>
+
+  <button class="add-btn" id="add-btn">+ Level 3 hinzufügen</button>
+
+  <!-- ── ADVANCED ── -->
+  <div class="adv-toggle" id="adv-tog">
+    <span class="lbl">⚙ Erweiterte Einstellungen</span>
+    <span class="chev">▼</span>
+  </div>
+  <div class="adv-body" id="adv-body">
+    <div class="adv-grid">
+      <div class="sl-row">
+        <div class="sl-meta"><span class="sl-lbl">EUR/USD</span><span class="sl-val" id="fx-v">1,08</span></div>
+        <input type="range" id="fx" min="0.90" max="1.30" value="1.08" step="0.01">
+      </div>
+      <div class="sl-row">
+        <div class="sl-meta"><span class="sl-lbl">Hebel</span><span class="sl-val" id="lev-v">24×</span></div>
+        <input type="range" id="lev" min="10" max="50" value="24" step="1">
+      </div>
+      <div class="sl-row">
+        <div class="sl-meta"><span class="sl-lbl">Master-Rendite/Monat</span><span class="sl-val" id="ret-v">1,0%</span></div>
+        <input type="range" id="ret" min="0.3" max="3.0" value="1.0" step="0.1">
+      </div>
+      <div class="sl-row">
+        <div class="sl-meta"><span class="sl-lbl">Trades/Monat</span><span class="sl-val" id="trd-v">22</span></div>
+        <input type="range" id="trd" min="8" max="44" value="22" step="1">
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RESULTS ── -->
+  <div class="sec-label">Ergebnis</div>
+
+  <div class="res-grid">
+    <div class="res-card hi">
+      <div class="res-rlbl">Monat 1</div>
+      <div class="res-val" id="r-m1">—</div>
+      <div class="res-sub">inkl. CPA</div>
+    </div>
+    <div class="res-card hi">
+      <div class="res-rlbl">Ab Monat 2</div>
+      <div class="res-val" id="r-m2">—</div>
+      <div class="res-sub">recurring</div>
+    </div>
+    <div class="res-card cpa-card">
+      <div class="res-rlbl">CPA-Stufe</div>
+      <div class="cpa-right">
+        <div class="res-val sm" id="r-cpapct">—</div>
+        <div class="res-sub" id="r-cpavol">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Breakdown -->
+  <div class="card table-card">
+    <div class="tw">
+      <table>
+        <thead>
+          <tr>
+            <th>Ebene</th>
+            <th class="tr">User</th>
+            <th class="tr">MT5 Vol</th>
+            <th class="tr">Lot Comm</th>
+            <th class="tr">Perf Share</th>
+            <th class="tr">Gesamt</th>
+          </tr>
+        </thead>
+        <tbody id="breakdown"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CPA tier bar -->
+  <div class="info" id="cpa-info"></div>
+  <div class="cpa-bar" id="cpa-bar"></div>
+
+  <!-- ── PROJECTION ── -->
+  <div class="sec-label">12-Monats-Prognose (mit Compounding)</div>
+  <div class="card table-card">
+    <div class="tw">
+      <table class="proj-table">
+        <thead>
+          <tr>
+            <th>Monat</th>
+            <th>Lot Comm</th>
+            <th>Perf Share</th>
+            <th>Monat</th>
+            <th>Kumuliert</th>
+          </tr>
+        </thead>
+        <tbody id="proj"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="info">
+    <strong>Methodik:</strong> Lot Commission und Performance Share wachsen monatlich proportional mit dem Kunden-Balance (Compounding-Effekt). CPA nur in Monat 1. Keine Gewähr für die Zukunft — Vergangenheitswerte als Basis.
+  </div>
+
+  <div class="page-foot">
+    Modellrechnung — vergangene Performance ≠ zukünftige Ergebnisse · SONIC AI MyFXBook #12076857
+  </div>
+
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <span class="logo-mark"><span class="ai">AI</span><span class="tech">TECH</span></span>
+  <p class="footer-copy">Verifiziert auf MyFXBook · FSC Mauritius · © 2026 AITECH<br>Trading ist generell mit Risiken verbunden – ein Totalverlust Deiner Einlage ist grundsätzlich möglich.</p>
+</footer>
+
+<script>
+// ── Constants ──────────────────────────────────────────────────────────────
+const MASTER_BAL   = 136316;
+const MASTER_LOTS  = 0.177;
+const LOT_RATES    = [2.00, 1.50, 1.10, 0.50, 0.50, 0.50, 0.50, 0.50, 0.50, 0.50];
+const PERF_PCT     = 0.025;
+
+const CPA = [
+  { min:40000000, rate:.08,  lbl:'8%',   vol:'$40M+' },
+  { min:3500000,  rate:.055, lbl:'5,5%', vol:'$3,5M+' },
+  { min:1000000,  rate:.05,  lbl:'5%',   vol:'$1M+' },
+  { min:200000,   rate:.035, lbl:'3,5%', vol:'$200k+' },
+  { min:50000,    rate:.02,  lbl:'2%',   vol:'$50k+' },
+  { min:10000,    rate:.01,  lbl:'1%',   vol:'$10k+' },
+  { min:0,        rate:0,    lbl:'—',    vol:'< $10k' },
+];
+
+let showL3 = false;
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+const $  = id => document.getElementById(id);
+const fmtUSD = n => '$' + Math.round(n).toLocaleString('de-DE');
+const fmtEUR = n => '€ ' + Number(n).toLocaleString('de-DE');
+const fmtVol = n => {
+  if (n >= 1e6) return '$' + (n/1e6).toFixed(2).replace('.',',') + 'M';
+  if (n >= 1e3) return '$' + Math.round(n/1e3) + 'k';
+  return '$' + Math.round(n);
+};
+
+function getCPA(vol) {
+  for (const t of CPA) if (vol >= t.min) return t;
+  return CPA[CPA.length-1];
+}
+
+/* ── Theme toggle ── */
+document.getElementById('theme-toggle').addEventListener('click', function () {
+  var light = document.documentElement.classList.toggle('theme-light');
+  try { localStorage.setItem('aitech-theme', light ? 'light' : 'dark'); } catch (e) {}
+});
+
+// ── Compute ───────────────────────────────────────────────────────────────
+function compute() {
+  const fx   = parseFloat($('fx').value);
+  const lev  = parseInt($('lev').value);
+  const ret  = parseFloat($('ret').value) / 100;
+  const trds = parseInt($('trd').value);
+
+  const cfg = [
+    { u: parseInt($('l1u').value), c: parseInt($('l1c').value) },
+    { u: parseInt($('l2u').value), c: parseInt($('l2c').value) },
+    { u: showL3 ? parseInt($('l3u').value) : 0, c: parseInt($('l3c').value) },
+  ];
+
+  const lvls = cfg.map((d, i) => {
+    if (d.u === 0) return null;
+    const capUSD  = d.c * fx;
+    const mt5User = capUSD * lev;
+    const mt5Tot  = mt5User * d.u;
+    const lots    = MASTER_LOTS * (mt5User / MASTER_BAL); // lots/trade per user
+    const mLots   = trds * lots * 2 * d.u;               // monthly round-trip lots
+    const lotC    = mLots * LOT_RATES[i];
+    const gross   = mt5Tot * ret;
+    const perf    = gross * PERF_PCT;
+    return { u:d.u, c:d.c, capUSD, mt5User, mt5Tot, mLots, lotC, gross, perf, tot:lotC+perf };
+  });
+
+  const l1r = lvls[0];
+  const flVol = l1r ? l1r.u * l1r.capUSD : 0;
+  const cpaTier = getCPA(flVol);
+  const cpaAmt  = flVol * cpaTier.rate;
+  const recurring = lvls.reduce((s,r)=>s+(r?r.tot:0), 0);
+
+  return { lvls, flVol, cpaTier, cpaAmt, recurring, month1: recurring+cpaAmt, ret, lev, trds };
+}
+
+// ── Render ────────────────────────────────────────────────────────────────
+const LNAMES  = ['Firstline (L1)', '2. Ebene (L2)', '3. Ebene (L3)'];
+const LCOLORS = ['var(--lime-text)', 'var(--gold-text)', 'var(--silver)'];
+
+function render() {
+  const d = compute();
+
+  // Summary
+  $('r-m1').textContent   = fmtUSD(d.month1);
+  $('r-m2').textContent   = fmtUSD(d.recurring);
+  $('r-cpapct').textContent = d.cpaTier.rate > 0 ? d.cpaTier.lbl : '< $10k';
+  $('r-cpavol').textContent = fmtVol(d.flVol) + ' Firstline';
+
+  // Breakdown table
+  let html = '';
+  let tl=0, tp=0, tt=0;
+  d.lvls.forEach((r,i) => {
+    if (!r) return;
+    tl+=r.lotC; tp+=r.perf; tt+=r.tot;
+    html += `<tr>
+      <td style="font-weight:600;color:${LCOLORS[i]}">${LNAMES[i]}</td>
+      <td class="tr">${r.u}</td>
+      <td class="tr">${fmtVol(r.mt5Tot)}</td>
+      <td class="tr">${fmtUSD(r.lotC)}</td>
+      <td class="tr">${fmtUSD(r.perf)}</td>
+      <td class="tr" style="color:var(--lime-text);font-weight:700">${fmtUSD(r.tot)}</td>
+    </tr>`;
+  });
+  html += `<tr class="td-total">
+    <td>Gesamt</td>
+    <td class="tr">—</td>
+    <td class="tr">—</td>
+    <td class="tr">${fmtUSD(tl)}</td>
+    <td class="tr">${fmtUSD(tp)}</td>
+    <td class="tr">${fmtUSD(tt)}</td>
+  </tr>`;
+  $('breakdown').innerHTML = html;
+
+  // CPA info
+  $('cpa-info').innerHTML = d.cpaTier.rate > 0
+    ? `<strong>CPA ${d.cpaTier.lbl}:</strong> ${fmtVol(d.flVol)} Firstline-Volumen × ${d.cpaTier.lbl} = <span class="lime">${fmtUSD(d.cpaAmt)}</span> einmalig in Monat 1`
+    : `<strong>CPA:</strong> Firstline-Volumen ${fmtVol(d.flVol)} — unter $10.000-Schwelle, noch keine CPA-Stufe`;
+
+  // CPA tier bar
+  const cpaHtml = CPA.slice(0,-1).reverse().map(t => `
+    <div class="cpa-step${d.flVol >= t.min && d.cpaTier.min === t.min ? ' active' : ''}">
+      <div class="cs-vol">${t.vol}</div>
+      <div class="cs-rate">${t.lbl}</div>
+    </div>`).join('');
+  $('cpa-bar').innerHTML = cpaHtml;
+
+  // Projection
+  let projHtml = '';
+  let cum = 0;
+  const gf = 1 + d.ret; // monthly compounding factor on customer balances
+
+  for (let m = 1; m <= 12; m++) {
+    const f = Math.pow(gf, m-1);
+    let lc=0, ps=0;
+    d.lvls.forEach(r => { if (!r) return; lc += r.lotC * f; ps += r.perf * f; });
+    const income = (m===1) ? (lc + ps + d.cpaAmt) : (lc + ps);
+    cum += income;
+    projHtml += `<tr class="${m===1?'hlr':''}">
+      <td class="proj-m">M${m}${m===1?' ✦':''}</td>
+      <td>${fmtUSD(lc)}</td>
+      <td>${fmtUSD(ps)}</td>
+      <td class="proj-hi">${fmtUSD(income)}</td>
+      <td style="color:var(--muted)">${fmtUSD(cum)}</td>
+    </tr>`;
+  }
+  $('proj').innerHTML = projHtml;
+}
+
+// ── Wire inputs ───────────────────────────────────────────────────────────
+function wire(id, dispId, fmt) {
+  $(id).addEventListener('input', () => {
+    $(dispId).textContent = fmt($(id).value);
+    render();
+  });
+}
+
+wire('l1u','l1u-v', v => v);
+wire('l1c','l1c-v', v => fmtEUR(v));
+wire('l2u','l2u-v', v => v);
+wire('l2c','l2c-v', v => fmtEUR(v));
+wire('l3u','l3u-v', v => v);
+wire('l3c','l3c-v', v => fmtEUR(v));
+wire('fx', 'fx-v',  v => parseFloat(v).toFixed(2).replace('.',','));
+wire('lev','lev-v', v => v + '×');
+wire('ret','ret-v', v => parseFloat(v).toFixed(1).replace('.',',') + '%');
+wire('trd','trd-v', v => v);
+
+// Add L3
+$('add-btn').addEventListener('click', () => {
+  showL3 = !showL3;
+  $('card-l3').style.display = showL3 ? 'block' : 'none';
+  $('add-btn').textContent = showL3 ? '− Level 3 entfernen' : '+ Level 3 hinzufügen';
+  render();
+});
+
+// Advanced toggle
+$('adv-tog').addEventListener('click', () => {
+  $('adv-tog').classList.toggle('open');
+  $('adv-body').classList.toggle('open');
+});
+
+// Boot
+render();
+</script>
+</body>
+</html>

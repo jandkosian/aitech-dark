@@ -1432,21 +1432,7 @@ function toggleWeek(btn) {
     var points = new THREE.Points(geo, mat);
     scene.add(points);
 
-    // Dezente Ringe hinter dem Hero-Text
-    var ring = new THREE.Mesh(
-      new THREE.TorusGeometry(6.2, 0.012, 8, 220),
-      new THREE.MeshBasicMaterial({ color: 0xe3c26b, transparent: true, opacity: 0.28 })
-    );
-    ring.position.z = -3;
-    scene.add(ring);
-    var ring2 = new THREE.Mesh(
-      new THREE.TorusGeometry(7.6, 0.008, 8, 220),
-      new THREE.MeshBasicMaterial({ color: 0xc9f24b, transparent: true, opacity: 0.16 })
-    );
-    ring2.position.z = -4;
-    scene.add(ring2);
-
-    // Partikel & Ringe dem aktiven Theme anpassen (auch beim Live-Umschalten)
+    // Partikel dem aktiven Theme anpassen (auch beim Live-Umschalten)
     window.__applyThreeTheme = function (light) {
       var limeC = new THREE.Color(light ? 0x7a961e : 0xc9f24b);
       var goldC = new THREE.Color(light ? 0xa8853e : 0xe3c26b);
@@ -1458,10 +1444,6 @@ function toggleWeek(btn) {
       mat.blending = light ? THREE.NormalBlending : THREE.AdditiveBlending;
       mat.opacity = light ? 0.3 : 0.4;
       mat.needsUpdate = true;
-      ring.material.color.setHex(light ? 0xa8853e : 0xe3c26b);
-      ring.material.opacity = light ? 0.35 : 0.28;
-      ring2.material.color.setHex(light ? 0x7a961e : 0xc9f24b);
-      ring2.material.opacity = light ? 0.25 : 0.16;
     };
     window.__applyThreeTheme(document.documentElement.classList.contains('theme-light'));
 
@@ -1502,11 +1484,6 @@ function toggleWeek(btn) {
 
       points.rotation.y = t * 0.012 + mouseX * 0.04;
       points.rotation.x = mouseY * 0.025;
-      ring.rotation.z  = t * 0.05;
-      ring.rotation.x  = Math.PI / 2.4 + mouseY * 0.04;
-      ring.rotation.y  = mouseX * 0.06;
-      ring2.rotation.z = -t * 0.035;
-      ring2.rotation.x = Math.PI / 2.6 - mouseY * 0.03;
 
       renderer.render(scene, camera);
     }

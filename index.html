@@ -264,17 +264,28 @@
     box-shadow: var(--chip-shadow);
   }
   .hero-content h1 { max-width: 900px; margin: 0 auto 18px; }
-  .hero-line-1 { font-family: var(--font-d); font-size: clamp(1.15rem, 2vw, 1.45rem); font-weight: 600; color: var(--text); margin-bottom: 6px; }
-  .hero-line-2 { font-size: clamp(1rem, 1.6vw, 1.15rem); color: var(--muted); margin-bottom: 14px; }
-  .hero-line-3 {
-    font-size: 0.95rem; font-weight: 600; letter-spacing: 0.14em;
-    text-transform: uppercase; color: var(--lime-text); margin-bottom: 22px;
-  }
   .hero-sub {
-    font-size: 16.5px; color: var(--muted); max-width: 640px;
-    margin: 0 auto 40px; line-height: 1.75;
+    font-size: clamp(1.05rem, 1.8vw, 1.25rem); color: var(--muted);
+    max-width: 620px; margin: 0 auto 26px; line-height: 1.7;
   }
-  .hero-disclaimer { font-size: 12.5px; color: var(--red); opacity: .85; }
+  .hero-sub strong { color: var(--text); font-weight: 600; }
+  .hero-chips {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 10px; margin: 0 auto 36px; max-width: 760px;
+  }
+  .hero-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: 100px;
+    border: 1px solid var(--line); background: var(--hover-tint);
+    font-size: 13px; font-weight: 500; color: var(--muted);
+    white-space: nowrap;
+  }
+  .hero-chip::before { content: '✓'; color: var(--lime-text); font-weight: 700; font-size: 12px; }
+  .hero-disclaimer { font-size: 12px; color: var(--faint); }
+  .hero-disclaimer .warn { color: var(--red); }
+  @media (max-width: 560px) {
+    .hero-chip { font-size: 12px; padding: 7px 13px; }
+  }
 
   .hero-visual {
     position: relative; z-index: 2;
@@ -677,11 +688,14 @@
   <div class="hero-content container">
     <div class="label">KI-gestütztes Copy-Trading · XAU/USD</div>
     <h1 id="hero-h1">Copy-Trading im <span class="accent-gold">Forex-Markt</span></h1>
-    <p class="hero-line-1">Dem größten Handelsmarkt der Welt</p>
-    <p class="hero-line-2">Vollautomatisch mit KI-Unterstützung</p>
-    <p class="hero-line-3">simplifiziert · kontrolliert · gewinnbringend</p>
-    <p class="hero-sub">Algorithmische Gold-Strategie · Broker-Infrastruktur · 24× Handelsvolumen · Verifiziert auf MyFXBook seit Nov 2024</p>
-    <p class="hero-disclaimer">⚠ Trading ist generell mit Risiken verbunden – ein Totalverlust deiner Einlage ist grundsätzlich möglich.</p>
+    <p class="hero-sub"><strong>Vollautomatisch handeln im größten Markt der Welt</strong> — simplifiziert, kontrolliert und gewinnbringend mit KI-Unterstützung.</p>
+    <div class="hero-chips">
+      <span class="hero-chip">Algorithmische Gold-Strategie</span>
+      <span class="hero-chip">24× Handelsvolumen</span>
+      <span class="hero-chip">Broker-Infrastruktur</span>
+      <span class="hero-chip">MyFXBook-verifiziert seit Nov 2024</span>
+    </div>
+    <p class="hero-disclaimer"><span class="warn">⚠</span> Trading ist generell mit Risiken verbunden – ein Totalverlust deiner Einlage ist grundsätzlich möglich.</p>
   </div>
 
   <!-- Forex-Ticker -->
@@ -1498,9 +1512,9 @@ function toggleWeek(btn) {
     // Hero-Intro
     gsap.from('#hero .label',       { y: 22, opacity: 0, duration: .8, ease: 'power3.out', delay: .1 });
     gsap.from('#hero-h1',           { y: 44, opacity: 0, duration: 1.05, ease: 'power3.out', delay: .22 });
-    gsap.from('.hero-line-1, .hero-line-2, .hero-line-3', { y: 26, opacity: 0, duration: .8, ease: 'power3.out', stagger: .09, delay: .4 });
-    gsap.from('.hero-sub',          { y: 26, opacity: 0, duration: .9, ease: 'power3.out', delay: .62 });
-    gsap.from('.hero-disclaimer',   { opacity: 0, duration: .8, delay: .8 });
+    gsap.from('.hero-sub',              { y: 26, opacity: 0, duration: .8, ease: 'power3.out', delay: .4 });
+    gsap.from('.hero-chips .hero-chip', { y: 16, opacity: 0, duration: .6, ease: 'power3.out', stagger: .07, delay: .55 });
+    gsap.from('.hero-disclaimer',       { opacity: 0, duration: .8, delay: .85 });
 
     // Scroll-Reveals
     gsap.utils.toArray('.reveal').forEach(function (el) {

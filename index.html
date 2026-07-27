@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AITECH – KI-gestütztes Gold Copy-Trading</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script>
+  // Theme vor dem ersten Paint setzen (verhindert Aufblitzen des falschen Themes)
+  try { if (localStorage.getItem('aitech-theme') === 'light') document.documentElement.classList.add('theme-light'); } catch (e) {}
+</script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #070806;
+    --bg-2:      #0b0d09;
+    --card:      #10130c;
+    --card-2:    #141810;
+    --line:      rgba(230,240,210,0.09);
+    --line-soft: rgba(230,240,210,0.05);
+    --lime:      #c9f24b;
+    --lime-soft: #a8cf3a;
+    --lime-dim:  rgba(201,242,75,0.12);
+    --gold:      #e3c26b;
+    --gold-deep: #b8964a;
+    --red:       #ff7a6b;
+    --text:      #f2f4ea;
+    --muted:     #a9b09a;
+    --faint:     #6d7462;
+
+    /* Themen-abhängige Ableitungen (Dark-Defaults) */
+    --lime-text: #c9f24b;
+    --gold-text: #e3c26b;
+    --hover-tint: var(--hover-tint);
+    --nav-bg:    rgba(7,8,6,0.82);
+    --chip-bg:   rgba(13,15,10,0.82);
+    --chip-shadow: 0 18px 50px rgba(0,0,0,0.5);
+    --card-hover-shadow: 0 24px 60px rgba(0,0,0,0.45);
+    --kachel-hover-shadow: 0 20px 50px rgba(0,0,0,0.45);
+    --hero-frame-shadow: 0 40px 120px rgba(0,0,0,0.6), 0 0 80px rgba(201,242,75,0.06);
+    --stat-bg:   var(--bg-2);
+    --dc-bg:     var(--bg-2);
+    --chart-baseline: rgba(230,240,210,0.12);
+    --chart-red: #ff7a6b;
+    --ghost-a:   rgba(201,242,75,0.10);
+    --ghost-b:   rgba(201,242,75,0.0);
+    --hero-mask: linear-gradient(180deg, #000 58%, transparent 97%);
+    --radius:    22px;
+    --radius-sm: 14px;
+    --font-d:    'Space Grotesk', system-ui, sans-serif;
+    --font-b:    'Inter', system-ui, sans-serif;
+    --font-m:    'JetBrains Mono', monospace;
+  }
+
+  /* ── Helles Grau-Theme (Umschalter im Header) ── */
+  html.theme-light {
+    --bg:        #eef0ea;   /* heller Grau-Grundton */
+    --bg-2:      #e2e5dc;   /* mittleres Grau für Wechsel-Sektionen */
+    --card:      #fafbf8;   /* Karten fast weiß */
+    --card-2:    #f2f4ee;
+    --line:      rgba(23,26,18,0.12);
+    --line-soft: rgba(23,26,18,0.07);
+    --lime-dim:  rgba(140,175,30,0.14);
+    --gold:      #b8944a;
+    --gold-deep: #8a6b32;
+    --red:       #d84a35;
+    --text:      #171a12;
+    --muted:     #565c4c;
+    --faint:     #7e8374;
+    --lime-text: #5f7d0d;
+    --gold-text: #8a6b32;
+    --hover-tint: rgba(23,26,18,0.05);
+    --nav-bg:    rgba(248,249,246,0.85);
+    --chip-bg:   rgba(255,255,255,0.88);
+    --chip-shadow: 0 18px 50px rgba(0,0,0,0.15);
+    --card-hover-shadow: 0 24px 60px rgba(0,0,0,0.12);
+    --kachel-hover-shadow: 0 20px 50px rgba(0,0,0,0.12);
+    --hero-frame-shadow: 0 30px 80px rgba(0,0,0,0.22), 0 0 80px rgba(201,242,75,0.15);
+    --stat-bg:   var(--card);
+    --dc-bg:     #ffffff;
+    --chart-baseline: rgba(23,26,18,0.15);
+    --chart-red: #d84a35;
+    --ghost-a:   rgba(23,26,18,0.10);
+    --ghost-b:   rgba(23,26,18,0.0);
+    /* Hell: früher ausblenden, damit dunkle Schrift lesbar bleibt */
+    --hero-mask: linear-gradient(180deg, #000 36%, transparent 78%);
+  }
+
+  html { scroll-behavior: smooth; }
+  ::selection { background: var(--lime); color: #0a0c05; }
+
+  body {
+    font-family: var(--font-b);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    font-size: 16px;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 28px; }
+  section { padding: 110px 0; position: relative; }
+
+  h1, h2, h3 { font-family: var(--font-d); letter-spacing: -0.02em; }
+  h1 { font-size: clamp(2.4rem, 5.2vw, 4.4rem); font-weight: 700; line-height: 1.06; }
+  h2 { font-size: clamp(1.8rem, 3.4vw, 2.8rem); font-weight: 700; line-height: 1.12; }
+  h3 { font-size: 1.15rem; font-weight: 600; }
+
+  .accent { color: var(--lime-text); }
+  .accent-gold { color: var(--gold-text); }
+  a.inline-link { color: var(--lime-text); text-decoration: underline; text-underline-offset: 3px; }
+  a.inline-link:hover { color: #e0ff7a; }
+
+  .label {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--lime-text);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .label::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--lime); box-shadow: 0 0 10px var(--lime);
+  }
+  .disclaimer { font-size: 12.5px; color: var(--faint); }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 15px 30px; border-radius: 100px;
+    font-family: var(--font-b); font-size: 15px; font-weight: 600;
+    cursor: pointer; text-decoration: none;
+    transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s, background .3s, color .3s, border-color .3s;
+    border: 1px solid transparent; white-space: nowrap;
+  }
+  .btn-primary { background: var(--lime); color: #0a0c05; }
+  .btn-primary:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 12px 40px rgba(201,242,75,0.28); }
+  .btn-ghost { background: transparent; color: var(--text); border-color: var(--line); }
+  .btn-ghost:hover { border-color: var(--lime-text); color: var(--lime-text); transform: translateY(-2px); }
+  .btn-lg { padding: 18px 38px; font-size: 16px; }
+  .btn svg { transition: transform .3s; }
+  .btn:hover svg { transform: translateX(4px); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 34px;
+    transition: transform .4s cubic-bezier(.22,1,.36,1), border-color .4s, box-shadow .4s;
+  }
+  .card:hover { transform: translateY(-4px); border-color: rgba(201,242,75,0.25); box-shadow: var(--card-hover-shadow); }
+
+  .badge {
+    display: inline-block; padding: 5px 12px; border-radius: 100px;
+    font-size: 12px; font-weight: 600; font-family: var(--font-m);
+  }
+  .badge-green { background: rgba(201,242,75,0.12); color: var(--lime-text); }
+
+  .section-header { text-align: center; margin-bottom: 64px; }
+  .section-header .label { margin-bottom: 18px; }
+  .section-header h2 { margin-bottom: 18px; }
+  .section-header p { font-size: 17px; color: var(--muted); max-width: 580px; margin: 0 auto; }
+
+  .img-frame {
+    border-radius: var(--radius); overflow: hidden;
+    border: 1px solid var(--line);
+    position: relative; display: block;
+  }
+  .img-frame img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .img-frame::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 55%, rgba(7,8,6,0.55) 100%);
+    pointer-events: none;
+  }
+
+  /* ─────────────────────────────────────────
+     NAV
+  ───────────────────────────────────────── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    padding: 0 28px;
+    transition: background .4s, border-color .4s, backdrop-filter .4s;
+    border-bottom: 1px solid transparent;
+  }
+  nav.scrolled {
+    background: var(--nav-bg);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-bottom-color: var(--line-soft);
+  }
+  .nav-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 76px; gap: 24px;
+  }
+  .nav-logo {
+    display: flex; align-items: center; text-decoration: none; flex-shrink: 0;
+    background: #0d0f14; padding: 4px 10px; border-radius: 8px;
+    border: 1px solid var(--line-soft);
+  }
+  .logo-img { height: 28px; display: block; }
+  .logo-mark {
+    font-family: var(--font-d); font-weight: 700; font-size: 24px; letter-spacing: -0.01em;
+    display: flex; align-items: center; gap: 2px;
+  }
+  .logo-mark .ai { color: var(--lime-text); text-shadow: 0 0 24px rgba(201,242,75,0.5); }
+  .logo-mark .tech { color: var(--text); }
+  .nav-links { display: flex; gap: 4px; }
+  .nav-links a {
+    padding: 9px 18px; border-radius: 100px;
+    color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500;
+    transition: color .25s, background .25s;
+  }
+  .nav-links a:hover { color: var(--text); background: var(--hover-tint); }
+  .nav-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .theme-toggle {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: transparent; border: 1px solid var(--line);
+    color: var(--text); cursor: pointer; padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: border-color .25s, color .25s, transform .3s cubic-bezier(.22,1,.36,1);
+  }
+  .theme-toggle:hover { border-color: var(--lime); color: var(--lime-text); transform: rotate(18deg) scale(1.06); }
+  .theme-toggle .ico-moon { display: none; }
+  html.theme-light .theme-toggle .ico-sun { display: none; }
+  html.theme-light .theme-toggle .ico-moon { display: block; }
+
+  /* ─────────────────────────────────────────
+     HERO
+  ───────────────────────────────────────── */
+  #hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: flex-start;
+    padding: 104px 0 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  #hero-canvas {
+    position: absolute; inset: 0; z-index: 0;
+    opacity: 0; transition: opacity 1.6s ease;
+  }
+  #hero-canvas.on { opacity: 1; }
+  .hero-glow {
+    position: absolute; z-index: 0; pointer-events: none;
+    width: 900px; height: 900px; border-radius: 50%;
+    top: -350px; left: 50%; transform: translateX(-50%);
+    background: radial-gradient(circle, rgba(201,242,75,0.10) 0%, transparent 62%);
+  }
+  .hero-content {
+    position: relative; z-index: 3; text-align: center;
+    /* zieht die Headline über den ausgeblendeten unteren Videobereich */
+    margin-top: clamp(-190px, -13vw, -60px);
+  }
+  .hero-content .label {
+    margin-bottom: 26px;
+    /* Glas-Pille: bleibt auch direkt über dem Video lesbar */
+    background: var(--chip-bg);
+    -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+    border: 1px solid var(--line);
+    padding: 9px 18px; border-radius: 100px;
+    box-shadow: var(--chip-shadow);
+  }
+  .hero-content h1 { max-width: 900px; margin: 0 auto 18px; }
+  .hero-line-1 { font-family: var(--font-d); font-size: clamp(1.15rem, 2vw, 1.45rem); font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .hero-line-2 { font-size: clamp(1rem, 1.6vw, 1.15rem); color: var(--muted); margin-bottom: 14px; }
+  .hero-line-3 {
+    font-size: 0.95rem; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--lime-text); margin-bottom: 22px;
+  }
+  .hero-sub {
+    font-size: 16.5px; color: var(--muted); max-width: 640px;
+    margin: 0 auto 40px; line-height: 1.75;
+  }
+  .hero-disclaimer { font-size: 12.5px; color: var(--red); opacity: .85; }
+
+  .hero-visual {
+    position: relative; z-index: 2;
+    width: 100%;
+    max-width: 1040px; margin: 0 auto; padding: 0 28px;
+  }
+  .hero-visual .img-frame {
+    aspect-ratio: 16/8;
+    border: none;
+    box-shadow: none;
+    /* Video läuft unten transparent aus — keine sichtbare Kante, Headline kann überlagern */
+    -webkit-mask-image: var(--hero-mask);
+            mask-image: var(--hero-mask);
+  }
+  .hero-visual video {
+    display: block; width: 100%; height: 100%; object-fit: cover;
+  }
+
+  /* ── Forex-Ticker ── */
+  .ticker-wrap {
+    position: relative; z-index: 2;
+    max-width: 1120px; margin: 34px auto 0;
+    overflow: hidden;
+    border-top: 1px solid var(--line-soft);
+    border-bottom: 1px solid var(--line-soft);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+            mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+  .ticker-fade { display: none; }
+  .ticker-track { display: flex; width: max-content; will-change: transform; }
+  .ticker-group {
+    display: flex; align-items: center; gap: 44px;
+    padding: 13px 22px; flex-shrink: 0;
+  }
+  .tick {
+    font-family: var(--font-m); font-size: 13px; color: var(--muted);
+    display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
+  }
+  .tick b { color: var(--text); font-weight: 700; }
+  .tick i { font-style: normal; font-size: 12px; }
+  .tick .up { color: var(--lime-text); }
+  .tick .dn { color: var(--red); }
+  @media (prefers-reduced-motion: reduce) {
+    .ticker-wrap { display: none; }
+  }
+  .hero-visual .img-frame::after {
+    background: linear-gradient(180deg, rgba(7,8,6,0.12) 0%, transparent 45%);
+  }
+  .float-chip {
+    position: absolute; z-index: 3;
+    background: var(--chip-bg); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--line); border-radius: 16px;
+    padding: 14px 20px; text-align: left;
+    box-shadow: var(--chip-shadow);
+  }
+  .float-chip .fc-num { font-family: var(--font-m); font-weight: 700; font-size: 20px; }
+  .float-chip .fc-lab { font-size: 11px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; margin-top: 2px; }
+  .chip-1 { top: 10%; left: -14px; }
+  .chip-2 { top: 22%; right: -14px; }
+
+  /* Stats mit Beschreibung */
+  .stat-strip {
+    position: relative; z-index: 2;
+    max-width: 1120px; margin: 56px auto 0; padding: 0 28px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+    background: var(--line-soft);
+    border-radius: var(--radius); overflow: hidden;
+    border: 1px solid var(--line-soft);
+  }
+  .stat-cell { background: var(--stat-bg); padding: 32px 26px 30px; text-align: left; }
+  .stat-number {
+    font-family: var(--font-m); font-size: clamp(1.5rem, 2.4vw, 2rem);
+    font-weight: 700; line-height: 1; margin-bottom: 10px;
+  }
+  .stat-label { font-size: 12.5px; color: var(--text); font-weight: 600; letter-spacing: .04em; margin-bottom: 12px; }
+  .stat-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* ─────────────────────────────────────────
+     ÖKOSYSTEM (Bento)
+  ───────────────────────────────────────── */
+  .eco-bento { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
+  .eco-card { position: relative; overflow: hidden; padding: 0; display: flex; flex-direction: column; }
+  .eco-media { aspect-ratio: 16/7; overflow: hidden; border-bottom: 1px solid var(--line-soft); }
+  .eco-media img { width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s cubic-bezier(.22,1,.36,1); }
+  .eco-card:hover .eco-media img { transform: scale(1.05); }
+  .eco-body { padding: 30px 32px 34px; }
+  .eco-body h3 { margin-bottom: 14px; font-size: 1.3rem; }
+  .eco-body h3 .h3-sub { font-family: var(--font-b); font-size: 13px; font-weight: 400; color: var(--muted); }
+  .eco-body p { color: var(--muted); font-size: 14.5px; }
+  .eco-body p + p { margin-top: 13px; }
+  .eco-body strong { color: var(--text); font-weight: 600; }
+
+  /* ─────────────────────────────────────────
+     SONIC AI STIL
+  ───────────────────────────────────────── */
+  .sonic-grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: 26px; align-items: stretch; }
+  .sonic-media { min-height: 100%; }
+  .sonic-media .img-frame { height: 100%; }
+  .sonic-card { padding: 42px; }
+  .sonic-head { display: flex; align-items: center; gap: 16px; margin-bottom: 10px; }
+  .sonic-chip {
+    background: linear-gradient(135deg, var(--lime), #8db832);
+    width: 46px; height: 46px; border-radius: 13px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 30px rgba(201,242,75,0.3);
+  }
+  .rule-list { list-style: none; margin-top: 22px; }
+  .rule-list li {
+    display: flex; align-items: flex-start; gap: 16px;
+    padding: 15px 0; border-bottom: 1px solid var(--line-soft);
+    font-size: 15.5px;
+  }
+  .rule-list li:last-child { border-bottom: none; }
+  .rule-check {
+    width: 24px; height: 24px; flex-shrink: 0; margin-top: 2px;
+    background: var(--lime-dim); border: 1px solid rgba(201,242,75,0.3); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--lime-text); font-size: 12px; font-weight: 700;
+  }
+  .rule-sub { font-size: 13.5px; color: var(--muted); }
+
+  /* ─────────────────────────────────────────
+     PERFORMANCE
+  ───────────────────────────────────────── */
+  #performance { background: var(--bg-2); border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); }
+
+  .daily-card { display: flex; gap: 44px; align-items: center; margin-bottom: 22px; padding: 38px 42px; }
+  .daily-left { flex: 1; min-width: 210px; }
+  .daily-num { font-family: var(--font-m); font-size: 2.6rem; font-weight: 700; color: var(--lime-text); margin-bottom: 4px; }
+  .daily-sub { font-size: 14px; color: var(--muted); }
+  .daily-chart { flex: 2; }
+  /* Wochen-Chart: Farben folgen dem Theme (CSS überstimmt SVG-Attribute) */
+  #week-chart line { stroke: var(--chart-baseline); }
+  #week-chart text[fill="#c9f24b"] { fill: var(--lime-text); }
+  #week-chart text[fill="#ff7a6b"] { fill: var(--chart-red); }
+  #week-chart rect[fill="#ff7a6b"] { fill: var(--chart-red); }
+
+  .perf-disclaimer {
+    background: rgba(227,194,107,0.07);
+    border: 1px solid rgba(227,194,107,0.25);
+    border-radius: var(--radius-sm);
+    padding: 16px 20px; font-size: 13.5px; color: var(--gold-text);
+    margin-bottom: 40px;
+  }
+
+  /* 4-Wochen Rückblick */
+  .weeks-card { padding: 0; overflow: hidden; }
+  .weeks-card:hover { transform: none; }
+  .weeks-head {
+    padding: 26px 30px 20px; border-bottom: 1px solid var(--line-soft);
+    display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+  }
+  .weeks-head h3 { font-size: 17px; margin: 0 0 3px; }
+  .weeks-head .wh-sub { font-size: 12.5px; color: var(--faint); }
+  .weeks-totals { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+  .wt-block { text-align: right; }
+  .wt-lbl { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); margin-bottom: 3px; }
+  .wt-val { font-family: var(--font-m); font-size: 22px; font-weight: 700; line-height: 1; }
+  .wt-sep { width: 1px; height: 38px; background: var(--line-soft); }
+
+  .week-acc { border-bottom: 1px solid var(--line-soft); }
+  .week-acc:last-child { border-bottom: none; }
+  .week-toggle {
+    width: 100%; background: none; border: none; cursor: pointer;
+    padding: 17px 26px; display: flex; align-items: center;
+    justify-content: space-between; gap: 12px; font-family: inherit;
+    color: var(--text); transition: background .2s;
+  }
+  .week-toggle:hover { background: rgba(201,242,75,0.03); }
+  .week-toggle-label { font-size: 14.5px; font-weight: 700; text-align: left; }
+  .week-toggle-sub { font-size: 11.5px; color: var(--faint); margin-top: 2px; text-align: left; }
+  .week-toggle-right { display: flex; align-items: center; gap: 12px; }
+  .week-sum-g { font-family: var(--font-m); font-size: 13.5px; font-weight: 700; color: var(--lime-text); }
+  .week-chevron { color: var(--faint); font-size: 14px; transition: transform .25s; }
+  .week-toggle.open .week-chevron { transform: rotate(180deg); }
+  .week-body { display: none; padding: 4px 18px 18px; }
+  .week-body.open { display: block; }
+
+  .dc {
+    background: var(--dc-bg);
+    border: 1px solid var(--line-soft);
+    border-left: 3px solid var(--lime);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+  }
+  .dc.loss  { border-left-color: var(--red); }
+  .dc.mixed { border-left-color: var(--gold-text); }
+  .dc-hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .dc-date { font-size: 13px; font-weight: 700; }
+  .dc-date .wd { font-weight: 400; color: var(--faint); }
+  .dc-badge {
+    font-size: 10px; font-family: var(--font-m); background: var(--hover-tint);
+    border-radius: 6px; padding: 3px 9px; color: var(--muted); font-weight: 600;
+  }
+  .dc-vals { display: flex; justify-content: space-between; align-items: baseline; }
+  .dc-brutto { font-family: var(--font-m); font-size: 21px; font-weight: 700; letter-spacing: -0.5px; line-height: 1; }
+  .dc-netto-wrap { text-align: right; }
+  .dc-netto-lbl { font-size: 9px; color: var(--faint); letter-spacing: .08em; text-transform: uppercase; }
+  .dc-netto { font-family: var(--font-m); font-size: 13px; font-weight: 600; }
+  .dc-val-g { color: var(--lime-text); }
+  .dc-val-r { color: var(--red); }
+
+  .pf-evt {
+    background: rgba(227,194,107,0.06); border: 1px solid rgba(227,194,107,0.22);
+    border-radius: 10px; padding: 9px 14px; margin-bottom: 2px;
+  }
+  .pf-evt-lbl { font-size: 11.5px; font-weight: 700; color: var(--gold-text); }
+  .pf-evt-lbl small { display: block; font-size: 10.5px; color: var(--gold-deep); font-weight: 400; margin-top: 1px; }
+
+  /* ─────────────────────────────────────────
+     RECHNER TEASER
+  ───────────────────────────────────────── */
+  .calc-teaser { padding: 0; overflow: hidden; display: grid; grid-template-columns: 1.2fr 1fr; align-items: stretch; }
+  .calc-teaser:hover { transform: none; }
+  .calc-teaser-body { padding: 56px 52px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; }
+  .calc-teaser-body .label { margin-bottom: 18px; }
+  .calc-teaser-body h2 { margin-bottom: 16px; }
+  .calc-teaser-body > p { color: var(--muted); max-width: 520px; margin-bottom: 32px; }
+  .calc-teaser-media { overflow: hidden; border-left: 1px solid var(--line-soft); min-height: 320px; }
+  .calc-teaser-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .calc-buttons { display: flex; gap: 14px; flex-wrap: wrap; }
+
+  /* ─────────────────────────────────────────
+     X24
+  ───────────────────────────────────────── */
+  .x24-layout { display: grid; grid-template-columns: 1fr 1.4fr; gap: 26px; align-items: stretch; }
+  .x24-media .img-frame { height: 100%; min-height: 380px; }
+  .x24-steps { display: flex; flex-direction: column; gap: 16px; }
+  .x24-step { flex: 1; display: flex; gap: 22px; align-items: flex-start; padding: 28px 30px; }
+  .step-num {
+    width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+    background: var(--lime); color: #0a0c05;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-m); font-weight: 700; font-size: 16px;
+  }
+  .x24-step h3 { margin-bottom: 8px; }
+  .x24-step p { font-size: 14.5px; color: var(--muted); }
+
+  /* ─────────────────────────────────────────
+     ONBOARDING
+  ───────────────────────────────────────── */
+  .onboarding-card { padding: 48px; max-width: 800px; margin: 0 auto; }
+  .onboarding-card:hover { transform: none; }
+  .steps-list { margin: 10px 0 6px; }
+  .step-row { display: flex; gap: 24px; padding: 24px 0; border-bottom: 1px solid var(--line-soft); }
+  .step-row:last-child { border-bottom: none; }
+  .step-circle {
+    width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0;
+    background: transparent; border: 1px solid rgba(201,242,75,0.4); color: var(--lime-text);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-m); font-weight: 700; font-size: 16px;
+    transition: background .3s, color .3s, box-shadow .3s;
+  }
+  .step-row:hover .step-circle { background: var(--lime); color: #0a0c05; box-shadow: 0 0 24px rgba(201,242,75,0.35); }
+  .step-content h3 { margin-bottom: 6px; }
+  .step-content p { font-size: 14.5px; color: var(--muted); }
+  .onboarding-cta { text-align: center; margin-top: 34px; }
+  .onboarding-cta p { color: var(--muted); font-size: 14.5px; margin-bottom: 18px; }
+
+  /* ─────────────────────────────────────────
+     RESSOURCEN
+  ───────────────────────────────────────── */
+  #ressourcen { background: var(--bg-2); border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); }
+  .ressourcen-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+  .ressource-kachel {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 32px 22px;
+    text-align: center; text-decoration: none; color: var(--text);
+    transition: transform .35s cubic-bezier(.22,1,.36,1), border-color .35s, box-shadow .35s;
+  }
+  .ressource-kachel:hover { transform: translateY(-5px); border-color: rgba(201,242,75,0.3); box-shadow: var(--kachel-hover-shadow); }
+  .ressource-icon { font-size: 30px; margin-bottom: 14px; }
+  .ressource-kachel h3 { font-size: 15px; margin-bottom: 4px; }
+  .ressource-kachel p { font-size: 12.5px; color: var(--muted); }
+
+  /* ─────────────────────────────────────────
+     FINALE CTA
+  ───────────────────────────────────────── */
+  .finale-card {
+    position: relative; overflow: hidden;
+    background: var(--card);
+    border: 1px solid rgba(201,242,75,0.25);
+    border-radius: 28px;
+    padding: 96px 40px;
+    text-align: center;
+  }
+  .finale-card::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 70% 90% at 50% 115%, rgba(201,242,75,0.22) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 45% at 82% -10%, rgba(227,194,107,0.12) 0%, transparent 60%);
+  }
+  .finale-inner { position: relative; z-index: 2; }
+  .finale-card .label { margin-bottom: 20px; }
+  .finale-card h2 { font-size: clamp(2rem, 4.4vw, 3.4rem); margin-bottom: 18px; }
+  .finale-card > .finale-inner > p { font-size: 18px; color: var(--muted); margin-bottom: 42px; }
+  .finale-disclaimer { font-size: 12.5px; color: var(--faint); margin-top: 26px; }
+
+  /* ─────────────────────────────────────────
+     FOOTER
+  ───────────────────────────────────────── */
+  footer {
+    border-top: 1px solid var(--line-soft);
+    padding: 72px 28px 0; position: relative; overflow: hidden;
+  }
+  .footer-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; flex-direction: column; align-items: center; gap: 22px;
+    position: relative; z-index: 2;
+  }
+  .footer-links { display: flex; gap: 28px; flex-wrap: wrap; justify-content: center; }
+  .footer-links a { color: var(--muted); text-decoration: none; font-size: 14px; transition: color 0.25s; }
+  .footer-links a:hover { color: var(--lime-text); }
+  .footer-copy { font-size: 12.5px; color: var(--faint); text-align: center; line-height: 1.8; }
+  .footer-ghost {
+    font-family: var(--font-d); font-weight: 700;
+    font-size: clamp(90px, 17vw, 250px); line-height: .78;
+    text-align: center; letter-spacing: -0.03em;
+    background: linear-gradient(180deg, var(--ghost-a) 0%, var(--ghost-b) 85%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    user-select: none; pointer-events: none;
+    margin-top: 48px; transform: translateY(12%);
+  }
+
+  /* ── Reveal defaults (GSAP setzt die Animation) ── */
+  .reveal { opacity: 0; transform: translateY(36px); }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1 !important; transform: none !important; }
+    html { scroll-behavior: auto; }
+  }
+
+  /* ─────────────────────────────────────────
+     RESPONSIVE
+  ───────────────────────────────────────── */
+  @media (max-width: 980px) {
+    section { padding: 76px 0; }
+    .nav-links { display: none; }
+    .stat-strip { grid-template-columns: 1fr 1fr; }
+    .eco-bento { grid-template-columns: 1fr; }
+    .sonic-grid { grid-template-columns: 1fr; }
+    .sonic-media .img-frame { aspect-ratio: 16/9; }
+    .daily-card { flex-direction: column; align-items: flex-start; }
+    .calc-teaser { grid-template-columns: 1fr; }
+    .calc-teaser-media { border-left: none; border-top: 1px solid var(--line-soft); min-height: 240px; }
+    .x24-layout { grid-template-columns: 1fr; }
+    .x24-media .img-frame { min-height: 0; aspect-ratio: 4/3; }
+    .ressourcen-grid { grid-template-columns: 1fr 1fr; }
+    .float-chip { display: none; }
+    .weeks-head { flex-direction: column; }
+    .weeks-totals { align-self: flex-start; }
+    .wt-block { text-align: left; }
+  }
+  @media (max-width: 560px) {
+    .stat-strip { grid-template-columns: 1fr; }
+    .ressourcen-grid { grid-template-columns: 1fr; }
+    .calc-buttons .btn { width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══ -->
+<nav id="nav">
+  <div class="nav-inner">
+    <a href="#hero" class="nav-logo" aria-label="AITECH">
+      <img src="assets/aitech-logo.jpg" alt="AITECH" class="logo-img">
+    </a>
+    <div class="nav-links">
+      <a href="https://jandkosian.github.io/sonic-ai-tools/" target="_blank" rel="noopener">Kapital-Rechner</a>
+      <a href="https://jandkosian.github.io/sonic-ai-tools/affiliate-rechner.html" target="_blank" rel="noopener">Affiliate-Rechner</a>
+    </div>
+    <div class="nav-right">
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Zwischen hellem und dunklem Design wechseln" title="Design wechseln">
+        <svg class="ico-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="ico-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <a href="#jetzt-starten" class="btn btn-primary" style="padding:11px 24px;font-size:14px;">Account erstellen</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section id="hero">
+  <canvas id="hero-canvas" aria-hidden="true"></canvas>
+  <div class="hero-glow" aria-hidden="true"></div>
+
+  <div class="hero-visual reveal">
+    <div class="float-chip chip-1">
+      <div class="fc-num accent">+1,72%</div>
+      <div class="fc-lab">Heute · 4/4 Wins</div>
+    </div>
+    <div class="float-chip chip-2">
+      <div class="fc-num accent-gold">XAU/USD</div>
+      <div class="fc-lab">1–4 Trades täglich</div>
+    </div>
+    <div class="img-frame">
+      <video id="hero-video" autoplay muted loop playsinline preload="auto"
+             poster="assets/hero-gold.png" aria-label="Gold-Barren mit Trading-Chart (animiert)">
+        <source src="assets/hero-gold.mp4" type="video/mp4">
+      </video>
+    </div>
+  </div>
+
+  <div class="hero-content container">
+    <div class="label">KI-gestütztes Copy-Trading · XAU/USD</div>
+    <h1 id="hero-h1">Copy-Trading im <span class="accent-gold">Forex-Markt</span></h1>
+    <p class="hero-line-1">Dem größten Handelsmarkt der Welt</p>
+    <p class="hero-line-2">Vollautomatisch mit KI-Unterstützung</p>
+    <p class="hero-line-3">simplifiziert · kontrolliert · gewinnbringend</p>
+    <p class="hero-sub">Algorithmische Gold-Strategie · Broker-Infrastruktur · 24× Handelsvolumen · Verifiziert auf MyFXBook seit Nov 2024</p>
+    <p class="hero-disclaimer">⚠ Trading ist generell mit Risiken verbunden – ein Totalverlust deiner Einlage ist grundsätzlich möglich.</p>
+  </div>
+
+  <!-- Forex-Ticker -->
+  <div class="ticker-wrap reveal" aria-hidden="true">
+    <div class="ticker-fade ticker-fade-l"></div>
+    <div class="ticker-fade ticker-fade-r"></div>
+    <div class="ticker-track" id="ticker-track">
+      <div class="ticker-group">
+        <span class="tick"><b>XAU/USD</b> 3.412,80 <i class="up">▲ +1,72%</i></span>
+        <span class="tick"><b>EUR/USD</b> 1,0894 <i class="up">▲ +0,21%</i></span>
+        <span class="tick"><b>GBP/USD</b> 1,2731 <i class="dn">▼ −0,08%</i></span>
+        <span class="tick"><b>USD/JPY</b> 154,62 <i class="up">▲ +0,34%</i></span>
+        <span class="tick"><b>XAG/USD</b> 38,91 <i class="up">▲ +0,96%</i></span>
+        <span class="tick"><b>BTC/USD</b> 118.240 <i class="up">▲ +2,10%</i></span>
+        <span class="tick"><b>USD/CHF</b> 0,8812 <i class="dn">▼ −0,12%</i></span>
+        <span class="tick"><b>AUD/USD</b> 0,6689 <i class="up">▲ +0,15%</i></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-strip reveal">
+    <div class="stat-cell">
+      <div class="stat-number accent" data-count="86.84" data-suffix="%" data-decimals="2">0%</div>
+      <div class="stat-label">Win-Rate</div>
+      <div class="stat-desc">Von 100 Trades enden fast 87 im Plus – der KI-Algorithmus liegt damit beeindruckend häufig richtig.</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-number" style="color:var(--text);" data-count="109.21" data-prefix="+" data-suffix="%" data-decimals="2">0%</div>
+      <div class="stat-label">ROI Gesamt</div>
+      <div class="stat-desc">Wer seit Start dabei ist, hat sein eingesetztes Kapital mehr als verdoppelt – ohne aktives Zutun. Mit unserem <a class="inline-link" href="https://jandkosian.github.io/sonic-ai-tools/" target="_blank" rel="noopener">24× Reinvest-Ansatz</a> liegt das Potenzial noch deutlich höher.</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-number accent-gold" data-count="0.26" data-suffix="%" data-decimals="2">0%</div>
+      <div class="stat-label">Max Drawdown</div>
+      <div class="stat-desc">Der größte zwischenzeitliche Verlust lag bei nur 0,26 % – das Konto war zu keiner Zeit in Gefahr.</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-number" style="color:var(--text);font-size:clamp(1.2rem,2vw,1.6rem);line-height:1.3;">Nov 2024</div>
+      <div class="stat-label">Verifiziert seit</div>
+      <div class="stat-desc">Alle Zahlen sind live auf MyFXBook verifiziert – einer unabhängigen Plattform, die direkt mit dem Broker verbunden ist. <a class="inline-link" href="https://www.myfxbook.com/members/SonicExperts/sonic-ai/12076857" target="_blank" rel="noopener">Live-Account ansehen →</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ÖKOSYSTEM ═══ -->
+<section id="oekosystem">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="label">Das AITECH Ökosystem</div>
+      <h2>4 Komponenten – <span class="accent">ein System</span></h2>
+      <p>Jede Komponente erfüllt eine klare Funktion im Gesamtsystem</p>
+    </div>
+    <div class="eco-bento">
+      <div class="card eco-card reveal">
+        <div class="eco-media"><img src="assets/eco-broker-v2.png" alt="TAG Markets – Broker-Infrastruktur" loading="lazy"></div>
+        <div class="eco-body">
+          <h3>TAG Markets <span class="h3-sub">— Der Broker</span></h3>
+          <p>Betrieben von <strong>T.M. Financials Ltd</strong> (Company No. C185265, Republik Mauritius), reguliert durch die <strong>Financial Services Commission (FSC) Mauritius</strong> – Lizenznummer <strong>GB21026474</strong>. Der Broker zählt zu den am schnellsten wachsenden der Branche: <strong>750.000+ Kunden</strong>, <strong>$350 Mrd.+ monatliches Handelsvolumen</strong>, 75 Liquiditätsprovider, ~6.000 neue Kunden täglich.</p>
+          <p>Über die hauseigene <strong>COPYX-Plattform</strong> wird Copy Trading vollautomatisch ermöglicht. Das X24-Modell stellt das 24-fache Handelskapital bereit – das Verlustrisiko bleibt auf die eigene Einlage begrenzt. Einzahlung per Krypto, IBAN oder Karte. Auszahlung per Visa-Debit-Karte, IBAN oder Krypto. Gewinne sind ab Tag 1 auszahlbar, Kapital unterliegt einer <strong>30-tägigen Haltefrist</strong>.</p>
+        </div>
+      </div>
+      <div class="card eco-card reveal">
+        <div class="eco-media"><img src="assets/eco-sonic.png" alt="SONIC AI – Das Trading-Team" loading="lazy"></div>
+        <div class="eco-body">
+          <h3>SONIC AI <span class="h3-sub">— Das Trading-Team</span></h3>
+          <p>Hinter SONIC AI steht ein <strong>6-köpfiges Trader-Team</strong> mit zusammen über <strong>15 Jahren Erfahrung</strong> im Forex-Markt – gewonnen durch die Arbeit mit privaten Family Offices und institutionellen Kunden. Alle Handelsentscheidungen werden gemeinsam getroffen. Bei der Signalfindung unterstützt ein eigenes <strong>KI-System</strong>, das Marktmuster in Echtzeit analysiert.</p>
+          <p>Gehandelt wird ausschließlich Gold (XAU/USD) – täglich <strong>1–4 kurze Trades</strong> (Ø &lt;15 Min), kein Overnight-Risiko. Seit November 2024 live, seit September 2025 öffentlich auf der COPYX-Plattform verfügbar – aktuell <strong>#1 der Strategien</strong> auf TAG Markets. Alle 329+ Trades sind auf <a class="inline-link" href="https://www.myfxbook.com/members/SonicExperts/sonic-ai/12076857" target="_blank" rel="noopener">MyFXBook öffentlich einsehbar</a> – kein Account erforderlich.</p>
+        </div>
+      </div>
+      <div class="card eco-card reveal">
+        <div class="eco-media"><img src="assets/eco-community.png" alt="Community / 24x Accounts" loading="lazy"></div>
+        <div class="eco-body">
+          <h3>Community / 24x Accounts</h3>
+          <p>Das 24-fache Handelsvolumen wird durch eine Kombination aus Einlage und dem <strong>AITECH Community Token</strong> im Verhältnis 50/50 freigeschaltet. Beispiel: 10.000 $ Einlage + 10.000 $ Token-Wert → 240.000 $ Handelsportfolio. TagMarkets stellt das Kapital über 75 Liquiditätsprovider bereit.</p>
+          <p>Das maximale Verlustrisiko (Drawdown-Limit) beträgt <strong>5 % des Portfolios</strong> – dafür wären historisch <strong>34 aufeinanderfolgende Verlusttrades</strong> nötig. In 16 Monaten Live-Betrieb lag das Maximum bei 2. Bei einer verifizierten Win-Rate von 86,84 % liegt die statistische Wahrscheinlichkeit dafür bei ca. <strong>0,000000000000000000000000000113 %</strong> — rechnerisch nahezu ausgeschlossen.</p>
+        </div>
+      </div>
+      <div class="card eco-card reveal">
+        <div class="eco-media"><img src="assets/eco-payout.png" alt="Gewinne, Auszahlung, Karte" loading="lazy"></div>
+        <div class="eco-body">
+          <h3>Gewinne, Auszahlung, Karte</h3>
+          <p>Von jedem erzielten Gewinn werden automatisch zwei Gebühren abgezogen, bevor der Nettogewinn dem Investor gutgeschrieben wird:</p>
+          <p><strong>1. Performance Fee (30%)</strong> — wird wöchentlich automatisch vom Profit abgezogen. Du behältst <strong>70% deines Gewinns</strong>. Keine monatliche Gebühr, kein Abo, keine Einstiegskosten — du zahlst nur, wenn die Strategie Geld verdient.</p>
+          <p><strong>2. Broker-Kommission</strong> — eine kleine Transaktionsgebühr pro Trade, die TAG Markets direkt einbehält. Diese ist bereits im ausgewiesenen Nettogewinn berücksichtigt.</p>
+          <p>Gewinne sind <strong>ab Tag 1 auszahlbar</strong> (ab 10 $) – per Krypto, IBAN oder Visa-Debit-Karte direkt vom Handelskonto, ohne Umweg über eine separate Wallet. Nur das eingezahlte Kapital unterliegt der <strong>30-tägigen Haltefrist</strong>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SONIC AI TRADING-STIL ═══ -->
+<section id="sonic-stil">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="label">Strategie-Transparenz</div>
+      <h2>SONIC AI Trading-Stil</h2>
+      <p>Klare Regeln. Keine Überraschungen. Vollständig nachprüfbar.</p>
+    </div>
+    <div class="sonic-grid">
+      <div class="sonic-media reveal">
+        <div class="img-frame"><img src="assets/community-desk.png" alt="SONIC AI Trading" loading="lazy"></div>
+      </div>
+      <div class="card sonic-card reveal">
+        <div class="sonic-head">
+          <div class="sonic-chip">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#0a0c05" stroke-width="2"/><path d="M12 6v6l4 2" stroke="#0a0c05" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <h3 style="margin:0;">Kern-Regeln der Strategie</h3>
+            <span class="label" style="font-size:11px;">XAU/USD · MetaTrader 5</span>
+          </div>
+        </div>
+        <ul class="rule-list">
+          <li>
+            <span class="rule-check">✓</span>
+            <div><strong>Nur XAU/USD (Gold vs. USD)</strong><br><span class="rule-sub">Klarer Fokus auf dem liquidesten Rohstoffmarkt der Welt</span></div>
+          </li>
+          <li>
+            <span class="rule-check">✓</span>
+            <div><strong>1–4 kurze Trades täglich, keine Übernacht-Positionen</strong><br><span class="rule-sub">Alle Positionen werden vor Handelsschluss geschlossen – kein Overnight-Risiko</span></div>
+          </li>
+          <li>
+            <span class="rule-check">✓</span>
+            <div><strong>Feste Risikobegrenzung pro Trade</strong><br><span class="rule-sub">Jeder Trade hat ein definiertes maximales Verlustlimit</span></div>
+          </li>
+          <li>
+            <span class="rule-check">✓</span>
+            <div><strong>Stop-Loss/Take-Profit in jedem Trade</strong><br><span class="rule-sub">Kein Trade ohne definierten Ausstieg – immer beide Levels gesetzt</span></div>
+          </li>
+          <li>
+            <span class="rule-check">✓</span>
+            <div><strong>Öffentlich nachprüfbar auf MyFXBook</strong><br><span class="rule-sub">329+ Trades · vollständige Historie · kein Account erforderlich</span></div>
+          </li>
+          <li>
+            <span class="rule-check">✓</span>
+            <div><strong>352.914 aktive Follower auf COPYX</strong><br><span class="rule-sub">#1 Strategie auf der Plattform · Stand Juli 2026</span></div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PERFORMANCE ═══ -->
+<section id="performance">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="label">Verifizierte Performance</div>
+      <h2>Zahlen, die für sich sprechen</h2>
+      <p>Alle Daten direkt von MyFXBook – unabhängig verifiziert</p>
+    </div>
+
+    <!-- Tages-Performance mit Bar-Chart -->
+    <div class="card daily-card reveal">
+      <div class="daily-left">
+        <div class="label" style="margin-bottom:10px;">Tages-Performance</div>
+        <div class="daily-num">+1,72%</div>
+        <div class="daily-sub">Heute · 25. Juli 2026</div>
+        <div style="margin-top:16px;">
+          <span class="badge badge-green">4 Trades · 4 Wins</span>
+        </div>
+      </div>
+      <div class="daily-chart">
+        <div class="label" style="margin-bottom:14px;">Letzte 7 Tage</div>
+        <svg id="week-chart" viewBox="0 0 320 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:360px;">
+          <line x1="0" y1="85" x2="320" y2="85" stroke="rgba(230,240,210,0.12)" stroke-width="1.5"/>
+          <text x="20"  y="98" font-size="10" fill="#6d7462" text-anchor="middle" font-family="Inter">Mo</text>
+          <text x="62"  y="98" font-size="10" fill="#6d7462" text-anchor="middle" font-family="Inter">Di</text>
+          <text x="104" y="98" font-size="10" fill="#6d7462" text-anchor="middle" font-family="Inter">Mi</text>
+          <text x="146" y="98" font-size="10" fill="#6d7462" text-anchor="middle" font-family="Inter">Do</text>
+          <text x="188" y="98" font-size="10" fill="#6d7462" text-anchor="middle" font-family="Inter">Fr</text>
+          <text x="230" y="98" font-size="10" fill="#6d7462" text-anchor="middle" font-family="Inter">Mo</text>
+          <text x="272" y="98" font-size="10" fill="#6d7462" text-anchor="middle" font-family="Inter">Di</text>
+          <g class="bars">
+            <rect x="8"   y="48" width="24" height="37" rx="5" fill="#c9f24b" opacity="0.75"/>
+            <rect x="50"  y="35" width="24" height="50" rx="5" fill="#c9f24b" opacity="0.75"/>
+            <rect x="92"  y="69" width="24" height="16" rx="5" fill="#ff7a6b" opacity="0.8"/>
+            <rect x="134" y="52" width="24" height="33" rx="5" fill="#c9f24b" opacity="0.75"/>
+            <rect x="176" y="60" width="24" height="25" rx="5" fill="#c9f24b" opacity="0.75"/>
+            <rect x="218" y="42" width="24" height="43" rx="5" fill="#c9f24b" opacity="0.75"/>
+            <rect x="260" y="50" width="24" height="35" rx="5" fill="#c9f24b"/>
+          </g>
+          <text x="20"  y="44" font-size="9" fill="#c9f24b" text-anchor="middle" font-weight="600" font-family="JetBrains Mono">+1.1%</text>
+          <text x="62"  y="31" font-size="9" fill="#c9f24b" text-anchor="middle" font-weight="600" font-family="JetBrains Mono">+1.8%</text>
+          <text x="104" y="65" font-size="9" fill="#ff7a6b" text-anchor="middle" font-weight="600" font-family="JetBrains Mono">-0.4%</text>
+          <text x="146" y="48" font-size="9" fill="#c9f24b" text-anchor="middle" font-weight="600" font-family="JetBrains Mono">+1.4%</text>
+          <text x="188" y="56" font-size="9" fill="#c9f24b" text-anchor="middle" font-weight="600" font-family="JetBrains Mono">+0.9%</text>
+          <text x="230" y="38" font-size="9" fill="#c9f24b" text-anchor="middle" font-weight="600" font-family="JetBrains Mono">+2.1%</text>
+          <text x="272" y="46" font-size="9" fill="#c9f24b" text-anchor="middle" font-weight="600" font-family="JetBrains Mono">+1.7%</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="perf-disclaimer reveal">
+      <strong>Wichtiger Hinweis:</strong> ~20% Monatsrendite sind Durchschnittswerte aus der bisherigen Performance-Historie — sie sind ausdrücklich NICHT garantiert und können in zukünftigen Monaten abweichen.
+    </div>
+
+    <!-- 4-Wochen Rückblick -->
+    <div class="card weeks-card reveal">
+      <div class="weeks-head">
+        <div>
+          <h3>4-Wochen Rückblick · XAU/USD</h3>
+          <span class="wh-sub">01.–25. Juli 2026 · 18 Handelstage · Netto = nach 30% Performance Fee</span>
+        </div>
+        <div class="weeks-totals">
+          <div class="wt-block">
+            <div class="wt-lbl">Brutto gesamt</div>
+            <div class="wt-val accent">+13,99%</div>
+          </div>
+          <div class="wt-sep"></div>
+          <div class="wt-block">
+            <div class="wt-lbl">Netto gesamt</div>
+            <div class="wt-val" style="color:var(--text);">+9,59%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── KW 1 ── -->
+      <div class="week-acc">
+        <button class="week-toggle" onclick="toggleWeek(this)">
+          <div>
+            <div class="week-toggle-label">01.–03. Juli</div>
+            <div class="week-toggle-sub">3 Handelstage · K1</div>
+          </div>
+          <div class="week-toggle-right">
+            <span class="week-sum-g">∑ +1,43%</span>
+            <span class="week-chevron">▾</span>
+          </div>
+        </button>
+        <div class="week-body">
+          <div class="dc">
+            <div class="dc-hd">
+              <span class="dc-date">01.07 <span class="wd">Di</span></span>
+              <span class="dc-badge">1T · 1W · SELL ↓</span>
+            </div>
+            <div class="dc-vals">
+              <span class="dc-brutto dc-val-g">+1,13%</span>
+              <div class="dc-netto-wrap"><div class="dc-netto-lbl">Netto</div><div class="dc-netto dc-val-g">+0,79%</div></div>
+            </div>
+          </div>
+          <div class="dc loss">
+            <div class="dc-hd">
+              <span class="dc-date">02.07 <span class="wd">Mi</span></span>
+              <span class="dc-badge">1T · 1L · BUY ↑ ❌</span>
+            </div>
+            <div class="dc-vals">
+              <span class="dc-brutto dc-val-r">−0,61%</span>
+              <div class="dc-netto-wrap"><div class="dc-netto-lbl">Netto</div><div class="dc-netto dc-val-r">−0,61%</div></div>
+            </div>
+          </div>
+          <div class="dc">
+            <div class="dc-hd">
+              <span class="dc-date">03.07 <span class="wd">Do</span></span>
+              <span class="dc-badge">2T · 2W</span>
+            </div>
+            <div class="dc-vals">
+              <span class="dc-brutto dc-val-g">+0,91%</span>
+              <div class="dc-netto-wrap"><div class="dc-netto-lbl">Netto</div><div class="dc-netto dc-val-g">+0,64%</div></div>
+            </div>
+          </div>
+          <div class="pf-evt">
+            <div class="pf-evt-lbl">⚡ Performance Fee abgezogen<small>04.07 · KW 01–03.07</small></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── KW 2 ── -->
+      <div class="week-acc">
+        <button class="week-toggle" onclick="toggleWeek(this)">
+          <div>
+            <div class="week-toggle-label">06.–10. Juli</div>
+            <div class="week-toggle-sub">5 Handelstage · K1</div>
+          </div>
+          <div class="week-toggle-right">
+            <span class="week-sum-g">∑ +4,63%</span>
+            <span class="week-chevron">▾</span>
+          </div>
+        </button>
+        <div class="week-body">
+          <div class="dc">
+            <div class="dc-hd">
+              <span class="dc-date">06.07 <span class="wd">Mo</span></span>
+              <span class="dc-badge">1T · 1W · SELL ↓</span>
+            </div>
+            <div class="dc-vals">
+              <span class="dc-brutto dc-val-g">+0,68%</span>
+              <div class="dc-netto-wrap"><div class="dc-netto-lbl">Netto</div><div class="dc-netto dc-val-g">+0,48%</div></div>
+            </div>
+          </div>
+          <div class="dc mixed">
+            <div class="dc-hd">
+              <span class="dc-date">07.07 <span class="wd">Di</span></span>
+              <span class="dc-badge">3T · 2W · 1L</span>
+            </div>
+            <div class="dc-vals">
+              <span class="dc-brutto dc-val-g">+0,79%</span>
+              <div class="dc-netto-wrap"><div class="dc-netto-lbl">Netto</div><div class="dc-netto dc-val-g">+0,55%</div></div>
+            </div>
+          </div>
+          <div class="dc">
+            <div class="dc-hd">
+              <span class="dc-date">08.07 <span class="wd">Mi</span></span>
+              <span class="dc-badge">2T · 2W</span>
+            </div>
+            <div class="dc-vals">
+              <span class="dc-brutto dc-val-g">+1,17%</span>
+              <div class="dc-netto-wrap"><div class="dc-netto-lbl">Netto</div><div class="dc-netto dc-val-g">+0,82%</div></div>
+            </div>
+          </div>
+          <div class="dc">
+            <div class="dc-hd">
+              <span class="dc-date">09.07 <span class="wd">Do</span></span>
+              <span class="dc-badge">2T · 2W</span>
+            </div>
+            <div class="dc-vals">
+              <span class="dc-brutto dc-val-g">+1,29%</span>
+              <div class="dc-netto-wrap"><div class="dc-netto-lbl">Netto</div><div class="dc-netto dc-val-g">+0,90%</div></div>
+            </div>
+          </div>
+          <div class="dc">
+            <div class="dc-hd">
+              <span class="dc-date">10.07 <span class="wd">Fr</span></span>
+              <span class="dc-badge">1T · 1W · BUY ↑</span>
+            </div>
+            <div class="dc-vals">
+              <span class="dc-brutto dc-val-g">+0,70%</span>
+              <div class="dc-netto-wrap"><div class="dc-netto-lbl">Netto</div><div class="dc-netto dc-val-g">+0,49%</div></div>
+            </div>
+          </div>
+          <div class="pf-evt">
+            <div class="pf-evt-lbl">⚡ Performance Fee abgezogen<small>11.07 · KW 06–10.07</small></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── KW 3 ── -->
+      <div class="week-acc">
+        <button class="week-toggle" onclick="toggleWeek(this)">
+          <div>
+            <div class="week-toggle-label">13.–17. Juli</div>
+            <div class="week-toggle-sub">5 Handelstage · K1 + K4</div>
+          </div>
+          <div class="week-toggle-right">
+            <span class="week-sum-g">∑ +3,56%</span>
+            <span class="week-chevron">▾</span>
+          </div>
+        </button>
+        <div class="week-body">
+          <div class="dc mixed">
+            <div class="dc-hd">
+              <span class="dc-date">13.07 <span class="wd">So</span></span>
+              <span class="dc-badge">2T · 1W · 1L</span>
+            </div>
+            <div class="dc-vals">
+              <span class="dc-brutto dc-val-g">+0,62%</span>
+              <div class="dc-netto-wrap"><div class="dc-netto-lbl">Netto</div><div class="dc-netto dc-val-g">+0,43%</div></div>
+            </div>
+          </div>
+          <div class="dc mixed">
+            <div class="dc-hd">
+              <span class="dc-date">14.07 <span class="wd">Mo</span></span>
+              <span class="dc-badge">2T · 1W · 1L</span>
+            </div>
+            <div class="dc-vals">
+              <span class="dc-brutto dc-val-g">+0,72%</span>
+              <div class="dc-netto-wrap"><div class="dc-netto-lbl">Netto</div><div class="dc-netto dc-val-g">+0,50%</div></div>
+            </div>
+          </div>
+          <div class="dc">
+            <div class="dc-hd">
+              <span class="dc-date">15.07 <span class="wd">Di</span></span>
+              <span class="dc-badge">4T · 4W</span>
+            </div>
+            <div class="dc-vals">
+              <span class="dc-brutto dc-val-g">+1,14%</span>
+              <div class="dc-netto-wrap"><div class="dc-netto-lbl">Netto</div><div class="dc-netto dc-val-g">+0,80%</div></div>
+            </div>
+          </div>
+          <div class="dc">
+            <div class="dc-hd">
+              <span class="dc-date">16.07 <span class="wd">Mi</span></span>
+              <span class="dc-badge">2T · 2W</span>
+            </div>
+            <div class="dc-vals">
+              <span class="dc-brutto dc-val-g">+0,36%</span>
+              <div class="dc-netto-wrap"><div class="dc-netto-lbl">Netto</div><div class="dc-netto dc-val-g">+0,25%</div></div>
+            </div>
+          </div>
+          <div class="dc">
+            <div class="dc-hd">
+              <span class="dc-date">17.07 <span class="wd">Do</span></span>
+              <span class="dc-badge">2T · 2W</span>
+            </div>
+            <div class="dc-vals">
+              <span class="dc-brutto dc-val-g">+0,72%</span>
+              <div class="dc-netto-wrap"><div class="dc-netto-lbl">Netto</div><div class="dc-netto dc-val-g">+0,50%</div></div>
+            </div>
+          </div>
+          <div class="pf-evt">
+            <div class="pf-evt-lbl">⚡ Performance Fee abgezogen<small>18.07 · K1 −$26,40 · K4 −$51,19</small></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── KW 4 ── -->
+      <div class="week-acc">
+        <button class="week-toggle open" onclick="toggleWeek(this)">
+          <div>
+            <div class="week-toggle-label">20.–24. Juli</div>
+            <div class="week-toggle-sub">5 Handelstage · K1 + K4</div>
+          </div>
+          <div class="week-toggle-right">
+            <span class="week-sum-g">∑ +4,37%</span>
+            <span class="week-chevron">▾</span>
+          </div>
+        </button>
+        <div class="week-body open">
+          <div class="dc">
+            <div class="dc-hd">
+              <span class="dc-date">20.07 <span class="wd">So</span></span>
+              <span class="dc-badge">4T · 4W</span>
+            </div>
+            <div class="dc-vals">
+              <span class="dc-brutto dc-val-g">+1,22%</span>
+              <div class="dc-netto-wrap"><div class="dc-netto-lbl">Netto</div><div class="dc-netto dc-val-g">+0,85%</div></div>
+            </div>
+          </div>
+          <div class="dc">
+            <div class="dc-hd">
+              <span class="dc-date">21.07 <span class="wd">Mo</span></span>
+              <span class="dc-badge">4T · 4W</span>
+            </div>
+            <div class="dc-vals">
+              <span class="dc-brutto dc-val-g">+0,96%</span>
+              <div class="dc-netto-wrap"><div class="dc-netto-lbl">Netto</div><div class="dc-netto dc-val-g">+0,67%</div></div>
+            </div>
+          </div>
+          <div class="dc">
+            <div class="dc-hd">
+              <span class="dc-date">22.07 <span class="wd">Di</span></span>
+              <span class="dc-badge">4T · 4W</span>
+            </div>
+            <div class="dc-vals">
+              <span class="dc-brutto dc-val-g">+0,46%</span>
+              <div class="dc-netto-wrap"><div class="dc-netto-lbl">Netto</div><div class="dc-netto dc-val-g">+0,32%</div></div>
+            </div>
+          </div>
+          <div class="dc mixed">
+            <div class="dc-hd">
+              <span class="dc-date">23.07 <span class="wd">Mi</span></span>
+              <span class="dc-badge">4T · 2W · 2L</span>
+            </div>
+            <div class="dc-vals">
+              <span class="dc-brutto dc-val-g">+0,14%</span>
+              <div class="dc-netto-wrap"><div class="dc-netto-lbl">Netto</div><div class="dc-netto dc-val-g">+0,10%</div></div>
+            </div>
+          </div>
+          <div class="dc">
+            <div class="dc-hd">
+              <span class="dc-date">24.07 <span class="wd">Do</span></span>
+              <span class="dc-badge">4T · 4W</span>
+            </div>
+            <div class="dc-vals">
+              <span class="dc-brutto dc-val-g">+1,59%</span>
+              <div class="dc-netto-wrap"><div class="dc-netto-lbl">Netto</div><div class="dc-netto dc-val-g">+1,11%</div></div>
+            </div>
+          </div>
+          <div class="pf-evt">
+            <div class="pf-evt-lbl">⚡ Performance Fee abgezogen<small>25.07 · K1 −$31,82 · K4 −$87,48</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ RECHNER TEASER ═══ -->
+<section id="rechner">
+  <div class="container">
+    <div class="card calc-teaser reveal">
+      <div class="calc-teaser-body">
+        <div class="label">Interaktive Rechner</div>
+        <h2>Berechne deine <span class="accent">persönliche Rendite</span></h2>
+        <p>Multi-Konto Simulator (K1/K2/K3), Affiliate-Provisionen und mehr — alle Tools auf einen Blick.</p>
+        <div class="calc-buttons">
+          <a href="https://jandkosian.github.io/sonic-ai-tools/" target="_blank" rel="noopener" class="btn btn-primary btn-lg">📈 Kapital-Rechner →</a>
+          <a href="https://jandkosian.github.io/sonic-ai-tools/affiliate-rechner.html" target="_blank" rel="noopener" class="btn btn-ghost btn-lg">🤝 Affiliate-Rechner →</a>
+        </div>
+      </div>
+      <div class="calc-teaser-media">
+        <img src="assets/x24-capital.png" alt="Kapitalwachstum" loading="lazy">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ X24-SYSTEM ═══ -->
+<section id="x24-system">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="label">Hebelstruktur</div>
+      <h2>Das <span class="accent">X24-System</span> erklärt</h2>
+      <p>24-faches Handelsvolumen – mit klar begrenztem Risiko</p>
+    </div>
+    <div class="x24-layout">
+      <div class="x24-media reveal">
+        <div class="img-frame"><img src="assets/x24-capital.png" alt="X24 – vervielfachtes Handelskapital" loading="lazy"></div>
+      </div>
+      <div class="x24-steps">
+        <div class="card x24-step reveal">
+          <div class="step-num">1</div>
+          <div>
+            <h3>Eigenes Kapital einzahlen</h3>
+            <p>Deine Einlage kommt per Krypto, IBAN oder Debitkarte. Die Mindesteinlage definiert dein maximales Verlustlimit.</p>
+          </div>
+        </div>
+        <div class="card x24-step reveal">
+          <div class="step-num">2</div>
+          <div>
+            <h3>Broker stellt X24 bereit</h3>
+            <p>TAG Markets stellt als Prime Broker &amp; Liquidity Provider das 24-Fache deiner Einlage als Handelskapital bereit.</p>
+          </div>
+        </div>
+        <div class="card x24-step reveal">
+          <div class="step-num">3</div>
+          <div>
+            <h3>KI-Team handelt</h3>
+            <p>SONIC AI handelt vollautomatisch. Gewinne werden wöchentlich geteilt. Maximaler Verlust = deine Einlage.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ONBOARDING ═══ -->
+<section id="onboarding">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="label">So startest du</div>
+      <h2>In 5 Schritten zum ersten Trade</h2>
+      <p>Wir begleiten dich durch jeden Schritt persönlich</p>
+    </div>
+    <div class="card onboarding-card reveal">
+      <div class="steps-list">
+        <div class="step-row">
+          <div class="step-circle">1</div>
+          <div class="step-content">
+            <h3>Registrierung</h3>
+            <p>Name, E-Mail, Land und Risiko-Bestätigung — schnell und unkompliziert. Für die erste Einzahlung per Krypto ist kein KYC erforderlich.</p>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-circle">2</div>
+          <div class="step-content">
+            <h3>TAG Markets Konto anlegen + Verifizierung</h3>
+            <p>Broker-Konto bei TAG Markets eröffnen. Schnelle Verifizierung (24–48h). Regulierter MetaTrader 5 Zugang inklusive.</p>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-circle">3</div>
+          <div class="step-content">
+            <h3>Einzahlung per Krypto</h3>
+            <p>Einzahlung per USDT (TRC20/ERC20), Bitcoin oder weiteren Kryptowährungen. Alternativ: IBAN oder Visa-Karte. Mindesteinzahlung: 100 $.</p>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-circle">4</div>
+          <div class="step-content">
+            <h3>SONIC-Strategie im CopyX-Bereich verbinden</h3>
+            <p>Im AITECH-Dashboard unter "CopyX" die SONIC AI Strategie verbinden – aktuell #1 auf der Plattform. Ein Klick — fertig.</p>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-circle">5</div>
+          <div class="step-content">
+            <h3>Trades in MT5 live mitverfolgen</h3>
+            <p>MetaTrader 5 App installieren und einloggen. Alle Trades werden automatisch in Echtzeit auf deinem Konto gespiegelt.</p>
+          </div>
+        </div>
+      </div>
+      <div class="onboarding-cta">
+        <p>Bei jedem Schritt unsicher? Ich begleite dich persönlich durch den Setup-Prozess.</p>
+        <a href="#jetzt-starten" class="btn btn-primary btn-lg">Persönliche Begleitung anfordern</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ RESSOURCEN ═══ -->
+<section id="ressourcen">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="label">Links &amp; Ressourcen</div>
+      <h2>Community &amp; Informationen</h2>
+      <p>Alles an einem Ort — bleib immer informiert</p>
+    </div>
+    <div class="ressourcen-grid">
+      <a href="#jetzt-starten" class="ressource-kachel reveal">
+        <div class="ressource-icon">📱</div>
+        <h3>Telegram</h3>
+        <p>News &amp; Updates</p>
+      </a>
+      <a href="#jetzt-starten" class="ressource-kachel reveal">
+        <div class="ressource-icon">📸</div>
+        <h3>Instagram</h3>
+        <p>@aitech.official</p>
+      </a>
+      <a href="#jetzt-starten" class="ressource-kachel reveal">
+        <div class="ressource-icon">🎥</div>
+        <h3>YouTube</h3>
+        <p>Webinare &amp; Analysen</p>
+      </a>
+      <a href="#jetzt-starten" class="ressource-kachel reveal">
+        <div class="ressource-icon">📄</div>
+        <h3>Präsentation</h3>
+        <p>PDF downloaden</p>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FINALE CTA ═══ -->
+<section id="jetzt-starten">
+  <div class="container">
+    <div class="finale-card reveal">
+      <div class="finale-inner">
+        <div class="label" style="margin-bottom:20px;">Bereit zu starten?</div>
+        <h2>Jetzt in den <span class="accent-gold">Goldmarkt</span> einsteigen</h2>
+        <p>Vollautomatisch · KI-gestützt · Verifiziert seit November 2024</p>
+        <a href="#hero" class="btn btn-primary btn-lg">
+          Jetzt Account erstellen
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <p class="finale-disclaimer">Investiere nur Beträge, deren Verlust du verkraften kannst · Trading ist generell mit Risiken verbunden · Ein Totalverlust deiner Einlage ist grundsätzlich möglich.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-inner">
+    <span class="logo-mark" style="font-size:22px;"><span class="ai">AI</span><span class="tech">TECH</span></span>
+    <div class="footer-links">
+      <a href="#jetzt-starten">Impressum</a>
+      <a href="#jetzt-starten">Datenschutz</a>
+      <a href="#jetzt-starten">Risikohinweise</a>
+    </div>
+    <p class="footer-copy">Verifiziert auf MyFXBook · FSC Mauritius · © 2026 AITECH<br>Trading ist generell mit Risiken verbunden – ein Totalverlust Deiner Einlage ist grundsätzlich möglich. Past performance is no guarantee of future results.</p>
+  </div>
+  <div class="footer-ghost" aria-hidden="true">AITECH</div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.158.0/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+/* Wochen-Akkordeon */
+function toggleWeek(btn) {
+  var body = btn.nextElementSibling;
+  var isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  btn.classList.toggle('open', !isOpen);
+}
+
+(function () {
+  'use strict';
+  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ───────────── NAV scroll state ───────────── */
+  var nav = document.getElementById('nav');
+  function onScroll() { nav.classList.toggle('scrolled', window.scrollY > 24); }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* ───────────── Theme-Switcher (Hell/Dunkel) ───────────── */
+  var themeToggle = document.getElementById('theme-toggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', function () {
+      var light = document.documentElement.classList.toggle('theme-light');
+      try { localStorage.setItem('aitech-theme', light ? 'light' : 'dark'); } catch (e) {}
+      if (window.__applyThreeTheme) window.__applyThreeTheme(light);
+    });
+  }
+
+  /* ───────────── Hero-Video (Loop, Reduced-Motion, Fallback) ───────────── */
+  (function initHeroVideo() {
+    var video = document.getElementById('hero-video');
+    if (!video) return;
+    if (reducedMotion) { video.removeAttribute('autoplay'); video.pause(); return; }
+    // Fällt das Video weg (Datei fehlt/Fehler), bleibt das Poster-Bild sichtbar
+    video.addEventListener('error', function () { video.load(); }, true);
+    var p = video.play();
+    if (p && p.catch) p.catch(function () { /* Autoplay blockiert → Poster bleibt */ });
+  })();
+
+  /* ───────────── Forex-Ticker (nahtloser Marquee) ───────────── */
+  (function initTicker() {
+    var track = document.getElementById('ticker-track');
+    if (!track || reducedMotion) return;
+    var group = track.querySelector('.ticker-group');
+    // Gruppe duplizieren bis 2× Viewport-Breite gefüllt ist → nahtloser Loop
+    var copies = Math.max(2, Math.ceil((window.innerWidth * 2) / group.offsetWidth));
+    for (var i = 0; i < copies; i++) track.appendChild(group.cloneNode(true));
+    var w = group.offsetWidth;
+    if (typeof gsap !== 'undefined') {
+      gsap.to(track, { x: -w, duration: Math.max(18, w / 55), ease: 'none', repeat: -1 });
+    }
+  })();
+
+  /* ───────────── THREE.JS Hero (dezent) ───────────── */
+  (function initThree() {
+    if (reducedMotion || typeof THREE === 'undefined') return;
+    var canvas = document.getElementById('hero-canvas');
+    var renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+    } catch (e) { return; }
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(58, 1, 0.1, 100);
+    camera.position.set(0, 0, 16);
+
+    // Partikelfeld: goldene + lime Punkte, sanft wogende Welle (bewusst dezent)
+    var COUNT = 380;
+    var positions = new Float32Array(COUNT * 3);
+    var colors = new Float32Array(COUNT * 3);
+    var seeds = new Float32Array(COUNT);
+    var lime = new THREE.Color(0xc9f24b);
+    var gold = new THREE.Color(0xe3c26b);
+
+    var kinds = new Uint8Array(COUNT); // 1 = lime, 0 = gold — für den Theme-Wechsel
+    for (var i = 0; i < COUNT; i++) {
+      positions[i * 3]     = (Math.random() - 0.5) * 46;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 24;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 14;
+      seeds[i] = Math.random() * Math.PI * 2;
+      kinds[i] = Math.random() < 0.62 ? 1 : 0;
+      var c = kinds[i] ? lime : gold;
+      colors[i * 3] = c.r; colors[i * 3 + 1] = c.g; colors[i * 3 + 2] = c.b;
+    }
+    var geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    var mat = new THREE.PointsMaterial({
+      size: 0.055, vertexColors: true, transparent: true, opacity: 0.4,
+      depthWrite: false, blending: THREE.AdditiveBlending,
+    });
+    var points = new THREE.Points(geo, mat);
+    scene.add(points);
+
+    // Dezente Ringe hinter dem Hero-Text
+    var ring = new THREE.Mesh(
+      new THREE.TorusGeometry(6.2, 0.012, 8, 220),
+      new THREE.MeshBasicMaterial({ color: 0xe3c26b, transparent: true, opacity: 0.28 })
+    );
+    ring.position.z = -3;
+    scene.add(ring);
+    var ring2 = new THREE.Mesh(
+      new THREE.TorusGeometry(7.6, 0.008, 8, 220),
+      new THREE.MeshBasicMaterial({ color: 0xc9f24b, transparent: true, opacity: 0.16 })
+    );
+    ring2.position.z = -4;
+    scene.add(ring2);
+
+    // Partikel & Ringe dem aktiven Theme anpassen (auch beim Live-Umschalten)
+    window.__applyThreeTheme = function (light) {
+      var limeC = new THREE.Color(light ? 0x7a961e : 0xc9f24b);
+      var goldC = new THREE.Color(light ? 0xa8853e : 0xe3c26b);
+      for (var i = 0; i < COUNT; i++) {
+        var c = kinds[i] ? limeC : goldC;
+        colors[i * 3] = c.r; colors[i * 3 + 1] = c.g; colors[i * 3 + 2] = c.b;
+      }
+      geo.attributes.color.needsUpdate = true;
+      mat.blending = light ? THREE.NormalBlending : THREE.AdditiveBlending;
+      mat.opacity = light ? 0.3 : 0.4;
+      mat.needsUpdate = true;
+      ring.material.color.setHex(light ? 0xa8853e : 0xe3c26b);
+      ring.material.opacity = light ? 0.35 : 0.28;
+      ring2.material.color.setHex(light ? 0x7a961e : 0xc9f24b);
+      ring2.material.opacity = light ? 0.25 : 0.16;
+    };
+    window.__applyThreeTheme(document.documentElement.classList.contains('theme-light'));
+
+    var mouseX = 0, mouseY = 0;
+    window.addEventListener('pointermove', function (e) {
+      mouseX = (e.clientX / window.innerWidth - 0.5);
+      mouseY = (e.clientY / window.innerHeight - 0.5);
+    }, { passive: true });
+
+    function resize() {
+      var hero = document.getElementById('hero');
+      var w = hero.clientWidth, h = hero.clientHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    var basePos = positions.slice();
+    var clock = new THREE.Clock();
+    var heroVisible = true;
+    new IntersectionObserver(function (entries) {
+      heroVisible = entries[0].isIntersecting;
+    }).observe(document.getElementById('hero'));
+
+    function tick() {
+      requestAnimationFrame(tick);
+      if (!heroVisible) return;
+      var t = clock.getElapsedTime();
+      var pos = geo.attributes.position.array;
+      for (var i = 0; i < COUNT; i++) {
+        var s = seeds[i];
+        pos[i * 3 + 1] = basePos[i * 3 + 1] + Math.sin(t * 0.5 + s + basePos[i * 3] * 0.18) * 0.7;
+        pos[i * 3]     = basePos[i * 3] + Math.cos(t * 0.28 + s) * 0.35;
+      }
+      geo.attributes.position.needsUpdate = true;
+
+      points.rotation.y = t * 0.012 + mouseX * 0.04;
+      points.rotation.x = mouseY * 0.025;
+      ring.rotation.z  = t * 0.05;
+      ring.rotation.x  = Math.PI / 2.4 + mouseY * 0.04;
+      ring.rotation.y  = mouseX * 0.06;
+      ring2.rotation.z = -t * 0.035;
+      ring2.rotation.x = Math.PI / 2.6 - mouseY * 0.03;
+
+      renderer.render(scene, camera);
+    }
+    tick();
+    canvas.classList.add('on');
+  })();
+
+  /* ───────────── GSAP Animationen ───────────── */
+  if (typeof gsap !== 'undefined' && !reducedMotion) {
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Hero-Intro
+    gsap.from('#hero .label',       { y: 22, opacity: 0, duration: .8, ease: 'power3.out', delay: .1 });
+    gsap.from('#hero-h1',           { y: 44, opacity: 0, duration: 1.05, ease: 'power3.out', delay: .22 });
+    gsap.from('.hero-line-1, .hero-line-2, .hero-line-3', { y: 26, opacity: 0, duration: .8, ease: 'power3.out', stagger: .09, delay: .4 });
+    gsap.from('.hero-sub',          { y: 26, opacity: 0, duration: .9, ease: 'power3.out', delay: .62 });
+    gsap.from('.hero-disclaimer',   { opacity: 0, duration: .8, delay: .8 });
+
+    // Scroll-Reveals
+    gsap.utils.toArray('.reveal').forEach(function (el) {
+      gsap.to(el, {
+        opacity: 1, y: 0, duration: 1, ease: 'power3.out',
+        scrollTrigger: { trigger: el, start: 'top 86%', once: true },
+      });
+    });
+
+    // Hero-Visual Parallax
+    gsap.to('.hero-visual .img-frame', {
+      yPercent: -7, ease: 'none',
+      scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true },
+    });
+    gsap.utils.toArray('.float-chip').forEach(function (chip, i) {
+      gsap.to(chip, {
+        y: i === 0 ? -26 : 26, ease: 'none',
+        scrollTrigger: { trigger: '.hero-visual', start: 'top bottom', end: 'bottom top', scrub: true },
+      });
+    });
+
+    // Count-Up-Zahlen
+    gsap.utils.toArray('[data-count]').forEach(function (el) {
+      var target   = parseFloat(el.getAttribute('data-count'));
+      var decimals = parseInt(el.getAttribute('data-decimals') || '0', 10);
+      var prefix   = el.getAttribute('data-prefix') || '';
+      var suffix   = el.getAttribute('data-suffix') || '';
+      var obj = { v: 0 };
+      gsap.to(obj, {
+        v: target, duration: 1.9, ease: 'power2.out',
+        scrollTrigger: { trigger: el, start: 'top 88%', once: true },
+        onUpdate: function () {
+          el.textContent = prefix + obj.v.toFixed(decimals).replace('.', ',') + suffix;
+        },
+      });
+    });
+
+    // Wochen-Balken wachsen lassen
+    gsap.utils.toArray('#week-chart .bars rect').forEach(function (bar, i) {
+      gsap.from(bar, {
+        scaleY: 0, transformOrigin: '50% 100%', duration: .8, delay: i * 0.07, ease: 'power3.out',
+        scrollTrigger: { trigger: '#week-chart', start: 'top 85%', once: true },
+      });
+    });
+
+    // Footer-Ghost leichtes Parallax
+    gsap.from('.footer-ghost', {
+      yPercent: 40, ease: 'none',
+      scrollTrigger: { trigger: 'footer', start: 'top bottom', end: 'bottom bottom', scrub: true },
+    });
+  } else {
+    // Fallback ohne GSAP/mit reduced motion: alles sichtbar
+    document.querySelectorAll('.reveal').forEach(function (el) {
+      el.style.opacity = '1'; el.style.transform = 'none';
+    });
+  }
+})();
+</script>
+</body>
+</html>

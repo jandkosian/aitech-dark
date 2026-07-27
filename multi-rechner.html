@@ -171,6 +171,28 @@
     margin-bottom: 14px; font-family: var(--font-m);
   }
 
+  /* ── Explain card ── */
+  .explain-intro { font-size: 14px; color: var(--text); margin-bottom: 14px; }
+  .explain-intro strong { color: var(--lime-text); }
+  .explain-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .explain-item {
+    background: var(--bg-2); border: 1px solid var(--line);
+    border-radius: 10px; padding: 13px 15px;
+  }
+  .explain-item.k1   { border-left: 3px solid var(--lime); }
+  .explain-item.push { border-left: 3px solid var(--gold); }
+  .explain-h {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; font-family: var(--font-m); margin-bottom: 7px;
+  }
+  .explain-item.k1 .explain-h   { color: var(--lime-text); }
+  .explain-item.push .explain-h { color: var(--gold-text); }
+  .explain-item p { font-size: 13px; color: var(--muted); line-height: 1.65; }
+  .explain-item p strong { color: var(--text); font-weight: 600; }
+  @media (max-width: 860px) {
+    .explain-grid { grid-template-columns: 1fr; }
+  }
+
   /* ── Global bar ── */
   .global-bar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
   .gb-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; font-family: var(--font-m); }
@@ -376,6 +398,22 @@
       <a href="index.html">← Übersicht</a>
       <a href="multi-rechner.html" class="active">📈 Multi-Konto</a>
       <a href="affiliate-rechner.html">🤝 Affiliate</a>
+    </div>
+  </div>
+
+  <!-- So funktioniert das Modell -->
+  <div class="card explain-card">
+    <div class="card-title">💡 So funktioniert das Modell</div>
+    <p class="explain-intro">Dieser Rechner zeigt dir, wie schnell dein <strong>K1-Arbeitskonto</strong> wächst, wenn zusätzliche Push-Konten ihre täglichen Gewinne dort einzahlen.</p>
+    <div class="explain-grid">
+      <div class="explain-item k1">
+        <div class="explain-h">K1 — Das Arbeitskonto</div>
+        <p>Das K1 ist dein zentrales Konto: Hier arbeitet dein Kapital und die Gewinne werden täglich reinvestiert (Zinseszins). Zusätzlich fließen die täglichen Gewinne aller aktiven Push-Konten auf das K1. <strong>Wichtig:</strong> Jede neue Einzahlung lässt die 30-Tage-Haltedauer wieder bei null beginnen. Da täglich eingezahlt wird, bleibt das K1-Kapital dauerhaft gebunden — dafür wächst es am schnellsten.</p>
+      </div>
+      <div class="explain-item push">
+        <div class="explain-h">K2 &amp; K3 — Die Push-Konten</div>
+        <p>Push-Konten behalten ihre Gewinne nicht, sondern zahlen sie jeden Tag auf das K1 ein. Auf diesen Konten findet also <strong>kein Reinvestment</strong> statt. Der Vorteil: Die 30-Tage-Haltedauer läuft ganz normal ab und wird nicht zurückgesetzt — nach 30 Tagen ist das Kapital der Push-Konten wieder <strong>komplett frei verfügbar</strong>.</p>
+      </div>
     </div>
   </div>
 

@@ -538,18 +538,6 @@
   /* ─────────────────────────────────────────
      RESSOURCEN
   ───────────────────────────────────────── */
-  #ressourcen { background: var(--bg-2); border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); }
-  .ressourcen-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
-  .ressource-kachel {
-    background: var(--card); border: 1px solid var(--line);
-    border-radius: var(--radius); padding: 32px 22px;
-    text-align: center; text-decoration: none; color: var(--text);
-    transition: transform .35s cubic-bezier(.22,1,.36,1), border-color .35s, box-shadow .35s;
-  }
-  .ressource-kachel:hover { transform: translateY(-5px); border-color: rgba(201,242,75,0.3); box-shadow: var(--kachel-hover-shadow); }
-  .ressource-icon { font-size: 30px; margin-bottom: 14px; }
-  .ressource-kachel h3 { font-size: 15px; margin-bottom: 4px; }
-  .ressource-kachel p { font-size: 12.5px; color: var(--muted); }
 
   /* ─────────────────────────────────────────
      FINALE CTA
@@ -622,7 +610,6 @@
     .calc-teaser-media { border-left: none; border-top: 1px solid var(--line-soft); min-height: 240px; }
     .x24-layout { grid-template-columns: 1fr; }
     .x24-media .img-frame { min-height: 0; aspect-ratio: 4/3; }
-    .ressourcen-grid { grid-template-columns: 1fr 1fr; }
     .float-chip { display: none; }
     .weeks-head { flex-direction: column; }
     .weeks-totals { align-self: flex-start; }
@@ -630,7 +617,6 @@
   }
   @media (max-width: 560px) {
     .stat-strip { grid-template-columns: 1fr; }
-    .ressourcen-grid { grid-template-columns: 1fr; }
     .calc-buttons .btn { width: 100%; justify-content: center; }
   }
 </style>
@@ -1301,39 +1287,6 @@
         <p>Bei jedem Schritt unsicher? Ich begleite dich persönlich durch den Setup-Prozess.</p>
         <a href="#jetzt-starten" class="btn btn-primary btn-lg">Persönliche Begleitung anfordern</a>
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ RESSOURCEN ═══ -->
-<section id="ressourcen">
-  <div class="container">
-    <div class="section-header reveal">
-      <div class="label">Links &amp; Ressourcen</div>
-      <h2>Community &amp; Informationen</h2>
-      <p>Alles an einem Ort — bleib immer informiert</p>
-    </div>
-    <div class="ressourcen-grid">
-      <a href="#jetzt-starten" class="ressource-kachel reveal">
-        <div class="ressource-icon">📱</div>
-        <h3>Telegram</h3>
-        <p>News &amp; Updates</p>
-      </a>
-      <a href="#jetzt-starten" class="ressource-kachel reveal">
-        <div class="ressource-icon">📸</div>
-        <h3>Instagram</h3>
-        <p>@aitech.official</p>
-      </a>
-      <a href="#jetzt-starten" class="ressource-kachel reveal">
-        <div class="ressource-icon">🎥</div>
-        <h3>YouTube</h3>
-        <p>Webinare &amp; Analysen</p>
-      </a>
-      <a href="#jetzt-starten" class="ressource-kachel reveal">
-        <div class="ressource-icon">📄</div>
-        <h3>Präsentation</h3>
-        <p>PDF downloaden</p>
-      </a>
     </div>
   </div>
 </section>

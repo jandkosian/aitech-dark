@@ -317,6 +317,7 @@
   .tick i { font-style: normal; font-size: 12px; }
   .tick .up { color: var(--lime-text); }
   .tick .dn { color: var(--red); }
+  .tick-label b { color: var(--lime-text); text-transform: uppercase; letter-spacing: .1em; font-size: 11px; }
   @media (prefers-reduced-motion: reduce) {
     .ticker-wrap { display: none; }
   }
@@ -658,7 +659,8 @@
   <div class="hero-visual reveal">
     <div class="float-chip chip-1">
       <div class="fc-num accent">+1,93%</div>
-      <div class="fc-lab">Netto 27.07. · 2/2 Wins</div>
+      <div class="fc-lab">Tagesrendite Netto · 2/2 Wins</div>
+      <div class="fc-lab">27.07.2026</div>
     </div>
     <div class="float-chip chip-2">
       <div class="fc-num accent-gold">XAU/USD</div>
@@ -688,16 +690,17 @@
     <div class="ticker-fade ticker-fade-r"></div>
     <div class="ticker-track" id="ticker-track">
       <div class="ticker-group">
-        <span class="tick"><b>14.07.</b> Brutto +0,72% <i class="up">▲ Netto +0,50%</i></span>
-        <span class="tick"><b>15.07.</b> Brutto +1,14% <i class="up">▲ Netto +0,80%</i></span>
-        <span class="tick"><b>16.07.</b> Brutto +0,36% <i class="up">▲ Netto +0,25%</i></span>
-        <span class="tick"><b>17.07.</b> Brutto +0,72% <i class="up">▲ Netto +0,50%</i></span>
-        <span class="tick"><b>20.07.</b> Brutto +1,22% <i class="up">▲ Netto +0,85%</i></span>
-        <span class="tick"><b>21.07.</b> Brutto +0,96% <i class="up">▲ Netto +0,67%</i></span>
-        <span class="tick"><b>22.07.</b> Brutto +0,46% <i class="up">▲ Netto +0,32%</i></span>
-        <span class="tick"><b>23.07.</b> Brutto +0,14% <i class="up">▲ Netto +0,10%</i></span>
-        <span class="tick"><b>24.07.</b> Brutto +1,59% <i class="up">▲ Netto +1,11%</i></span>
-        <span class="tick"><b>27.07.</b> Brutto +2,76% <i class="up">▲ Netto +1,93%</i></span>
+        <span class="tick tick-label"><b>● Tagesrenditen</b></span>
+        <span class="tick"><b>14.07.2026</b> Brutto +0,72% <i class="up">▲ Netto +0,50%</i></span>
+        <span class="tick"><b>15.07.2026</b> Brutto +1,14% <i class="up">▲ Netto +0,80%</i></span>
+        <span class="tick"><b>16.07.2026</b> Brutto +0,36% <i class="up">▲ Netto +0,25%</i></span>
+        <span class="tick"><b>17.07.2026</b> Brutto +0,72% <i class="up">▲ Netto +0,50%</i></span>
+        <span class="tick"><b>20.07.2026</b> Brutto +1,22% <i class="up">▲ Netto +0,85%</i></span>
+        <span class="tick"><b>21.07.2026</b> Brutto +0,96% <i class="up">▲ Netto +0,67%</i></span>
+        <span class="tick"><b>22.07.2026</b> Brutto +0,46% <i class="up">▲ Netto +0,32%</i></span>
+        <span class="tick"><b>23.07.2026</b> Brutto +0,14% <i class="up">▲ Netto +0,10%</i></span>
+        <span class="tick"><b>24.07.2026</b> Brutto +1,59% <i class="up">▲ Netto +1,11%</i></span>
+        <span class="tick"><b>27.07.2026</b> Brutto +2,76% <i class="up">▲ Netto +1,93%</i></span>
       </div>
     </div>
   </div>

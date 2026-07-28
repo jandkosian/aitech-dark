@@ -551,6 +551,38 @@
   }
 
   /* ─────────────────────────────────────────
+     SONIC MASKOTTCHEN
+  ───────────────────────────────────────── */
+  #rechner, #x24-system, #performance, #jetzt-starten { overflow-x: clip; }
+  .sonic-spot {
+    position: absolute; z-index: 2; cursor: pointer;
+    user-select: none; -webkit-tap-highlight-color: transparent;
+  }
+  .sonic-spot img {
+    display: block; width: 100%; height: auto; -webkit-user-drag: none; pointer-events: none;
+    filter: drop-shadow(0 12px 26px rgba(0,0,0,0.5)) drop-shadow(0 0 16px rgba(201,242,75,0.15));
+  }
+  .sonic-bob { animation: sonicFloat 4.5s ease-in-out infinite; }
+  .sonic-spot:hover .sonic-bob { animation-duration: 2.2s; }
+  @keyframes sonicFloat {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    50%      { transform: translateY(-10px) rotate(-1.5deg); }
+  }
+  .sonic-spot.spin { animation: sonicSpin .8s cubic-bezier(.35,.05,.3,1.25); }
+  @keyframes sonicSpin {
+    0%   { transform: rotate(0) scale(1); }
+    55%  { transform: rotate(660deg) scale(.7); }
+    100% { transform: rotate(720deg) scale(1); }
+  }
+  .sonic-hero    { right: 44px; bottom: -16px; width: clamp(110px, 11vw, 160px); z-index: 4; }
+  .sonic-rechner { left: 2vw; bottom: 26px;  width: clamp(100px, 11vw, 165px); }
+  .sonic-x24     { right: 3vw; top: 108px;   width: clamp(100px, 11vw, 160px); }
+  .sonic-perf    { right: 4vw; top: 90px;    width: clamp(110px, 12vw, 170px); }
+  .sonic-cta     { right: -8px; bottom: 36px; width: clamp(110px, 12vw, 160px); z-index: 3; }
+  @media (max-width: 1000px) { .sonic-spot { display: none; } }
+  @media (prefers-reduced-motion: reduce) { .sonic-bob, .sonic-spot.spin { animation: none; } }
+
+  /* ─────────────────────────────────────────
      ONBOARDING
   ───────────────────────────────────────── */
   .onboarding-card { padding: 48px; max-width: 800px; margin: 0 auto; }
@@ -708,6 +740,7 @@
         <source src="assets/hero-gold.mp4" type="video/mp4">
       </video>
     </div>
+    <div class="sonic-spot sonic-hero" aria-hidden="true" title="Das ist SONIC — klick mich!"><div class="sonic-bob"><img src="assets/sonic-wave.png" alt=""></div></div>
   </div>
 
   <div class="hero-content container">
@@ -871,6 +904,7 @@
 
 <!-- ═══ PERFORMANCE ═══ -->
 <section id="performance">
+  <div class="sonic-spot sonic-perf" aria-hidden="true" title="Das ist SONIC — klick mich!"><div class="sonic-bob"><img src="assets/sonic-cheer.png" alt=""></div></div>
   <div class="container">
     <div class="section-header reveal">
       <div class="label">Verifizierte Performance</div>
@@ -1226,6 +1260,7 @@
 
 <!-- ═══ RECHNER TEASER ═══ -->
 <section id="rechner">
+  <div class="sonic-spot sonic-rechner" aria-hidden="true" title="Das ist SONIC — klick mich!"><div class="sonic-bob"><img src="assets/sonic-point.png" alt=""></div></div>
   <div class="container">
     <div class="card calc-teaser reveal">
       <div class="calc-teaser-body">
@@ -1247,6 +1282,7 @@
 
 <!-- ═══ X24-SYSTEM ═══ -->
 <section id="x24-system">
+  <div class="sonic-spot sonic-x24" aria-hidden="true" title="Das ist SONIC — klick mich!"><div class="sonic-bob"><img src="assets/sonic-crossed.png" alt=""></div></div>
   <div class="container">
     <div class="section-header reveal">
       <div class="label">Hebelstruktur</div>
@@ -1365,6 +1401,7 @@
 
 <!-- ═══ FINALE CTA ═══ -->
 <section id="jetzt-starten">
+  <div class="sonic-spot sonic-cta" data-from-x="140" aria-hidden="true" title="Das ist SONIC — klick mich!"><div class="sonic-bob"><img src="assets/sonic-peek.png" alt=""></div></div>
   <div class="container">
     <div class="finale-card reveal">
       <div class="finale-inner">
@@ -1608,6 +1645,16 @@ function toggleWeek(btn) {
       });
     });
 
+    // SONIC Maskottchen — Entrance
+    gsap.utils.toArray('.sonic-spot').forEach(function (el) {
+      var fromX = parseFloat(el.getAttribute('data-from-x') || '0');
+      gsap.from(el, {
+        y: fromX ? 0 : 56, x: fromX, opacity: 0, scale: fromX ? 1 : 0.75,
+        duration: .9, ease: 'back.out(1.5)',
+        scrollTrigger: { trigger: el.closest('section'), start: 'top 65%', once: true },
+      });
+    });
+
     // Footer-Ghost leichtes Parallax
     gsap.from('.footer-ghost', {
       yPercent: 40, ease: 'none',
@@ -1619,6 +1666,18 @@ function toggleWeek(btn) {
       el.style.opacity = '1'; el.style.transform = 'none';
     });
   }
+
+  /* ───────────── SONIC Spin-Dash ───────────── */
+  document.querySelectorAll('.sonic-spot').forEach(function (el) {
+    el.addEventListener('click', function () {
+      if (el.classList.contains('spin')) return;
+      el.classList.add('spin');
+      el.addEventListener('animationend', function h() {
+        el.classList.remove('spin');
+        el.removeEventListener('animationend', h);
+      });
+    });
+  });
 })();
 </script>
 </body>

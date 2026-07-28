@@ -62,30 +62,41 @@
   .title-block { text-align: center; margin-bottom: 8px; }
   h1 {
     font-family: var(--font-d); font-weight: 700; letter-spacing: -0.01em;
-    font-size: clamp(1.45rem, 5.2vw, 1.95rem); line-height: 1.2;
+    font-size: clamp(1.6rem, 5.6vw, 2.15rem); line-height: 1.2;
   }
   h1 .date { color: var(--lime-text); }
-  .symbol { font-family: var(--font-m); font-weight: 700; font-size: 19px; letter-spacing: 0.14em; margin-top: 6px; }
+  .symbol { font-family: var(--font-m); font-weight: 700; font-size: 21px; letter-spacing: 0.14em; margin-top: 6px; }
   .strategy {
     font-family: var(--font-m); font-size: 12px; letter-spacing: 0.2em;
     text-transform: uppercase; color: var(--faint); margin-top: 6px;
   }
   .strategy b { color: var(--lime-text); font-weight: 700; }
 
-  /* ── Big number ── */
-  .big-wrap { text-align: center; margin: 14px 0 6px; }
+  /* ── Big number + Maskottchen ── */
+  .big-wrap { margin: 18px 0 8px; text-align: center; }
+  .big-row {
+    display: flex; align-items: flex-end; justify-content: center;
+    gap: 0; padding-right: 10px;
+  }
   .big {
     font-family: var(--font-d); font-weight: 700;
-    font-size: clamp(4.4rem, 18vw, 7rem); line-height: 1;
+    font-size: clamp(4.6rem, 19vw, 7.4rem); line-height: 1;
     color: var(--lime-text); letter-spacing: -0.03em;
-    text-shadow: 0 0 60px rgba(201,242,75,0.25);
+    text-shadow: 0 0 60px rgba(201,242,75,0.28);
   }
-  .big-sub { font-size: 14.5px; color: var(--muted); margin-top: 8px; }
+  .big-mascot {
+    height: clamp(150px, 40vw, 215px); width: auto; flex-shrink: 0;
+    margin-left: -26px; margin-bottom: -6px;
+    transform: rotate(-9deg); transform-origin: bottom center;
+    filter: drop-shadow(0 0 22px rgba(201,242,75,0.22));
+    position: relative; z-index: 1;
+  }
+  .big-sub { font-size: 16px; color: var(--muted); margin-top: 10px; }
 
   /* ── Chips ── */
   .chips { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 18px 0 22px; }
   .chip {
-    font-family: var(--font-m); font-size: 12px; font-weight: 700;
+    font-family: var(--font-m); font-size: 13px; font-weight: 700;
     letter-spacing: 0.08em; text-transform: uppercase;
     padding: 8px 15px; border-radius: 100px;
     display: inline-flex; align-items: center; gap: 7px;
@@ -106,10 +117,10 @@
   }
   .trade {
     display: flex; align-items: center; gap: 12px;
-    padding: 14px 16px; font-family: var(--font-m); font-size: 15px;
+    padding: 15px 16px; font-family: var(--font-m); font-size: 16px;
   }
   .trade + .trade { border-top: 1px solid var(--line-soft); }
-  .t-time { color: var(--faint); font-size: 13px; white-space: nowrap; }
+  .t-time { color: var(--faint); font-size: 14px; white-space: nowrap; }
   .t-side {
     font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
     background: var(--lime); color: #0a0c05;
@@ -132,20 +143,18 @@
     margin-bottom: 10px;
   }
   .month-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; text-align: center; }
-  .m-val { font-family: var(--font-m); font-weight: 700; font-size: clamp(1.05rem, 3.8vw, 1.45rem); }
+  .m-val { font-family: var(--font-m); font-weight: 700; font-size: clamp(1.15rem, 4.2vw, 1.6rem); }
   .m-val.lime { color: var(--lime-text); }
-  .m-key { font-family: var(--font-m); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
+  .m-key { font-family: var(--font-m); font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
 
   /* ── Claim ── */
-  .claim { margin-bottom: 4px; display: flex; align-items: center; gap: 14px; }
-  .claim-body { flex: 1; min-width: 0; }
-  .claim-mascot { height: 118px; width: auto; flex-shrink: 0; filter: drop-shadow(0 0 18px rgba(201,242,75,0.18)); }
+  .claim { margin-bottom: 4px; text-align: center; }
   .claim-eyebrow {
     font-family: var(--font-m); font-size: 11px; font-weight: 700;
     letter-spacing: 0.18em; text-transform: uppercase; color: var(--lime-text);
     margin-bottom: 5px;
   }
-  .claim-txt { font-size: 16.5px; font-weight: 600; line-height: 1.45; }
+  .claim-txt { font-size: 18px; font-weight: 600; line-height: 1.45; }
 
   /* ── Risk ── */
   .risk {
@@ -153,7 +162,7 @@
     padding: 14px 30px; text-align: center;
   }
   .risk-t { font-family: var(--font-m); font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
-  .risk p { font-size: 10px; line-height: 1.6; color: var(--faint); }
+  .risk p { font-size: 10.5px; line-height: 1.6; color: var(--faint); }
 
   /* ── Bottom bar ── */
   .bar {
@@ -188,9 +197,12 @@
       <div class="strategy">COPYX · STRATEGIE <b>SONIC</b></div>
     </div>
 
-    <!-- Big number -->
+    <!-- Big number + Maskottchen -->
     <div class="big-wrap">
-      <div class="big" id="gross"></div>
+      <div class="big-row">
+        <div class="big" id="gross"></div>
+        <img class="big-mascot" src="assets/sonic-daily.png" alt="Sonic AI Maskottchen">
+      </div>
       <div class="big-sub">Tagesergebnis · brutto (vor Gebühren &amp; 30&nbsp;% Community-Split)</div>
     </div>
 
@@ -212,11 +224,8 @@
 
     <!-- Claim -->
     <div class="claim">
-      <div class="claim-body">
-        <div class="claim-eyebrow">Jetzt bei AITECH einsteigen</div>
-        <div class="claim-txt">Sonic AI — eines der bewährten Tools der AITECH-Community.</div>
-      </div>
-      <img class="claim-mascot" src="assets/sonic-daily.png" alt="Sonic AI mascot">
+      <div class="claim-eyebrow">Jetzt bei AITECH einsteigen</div>
+      <div class="claim-txt">Sonic AI — eines der bewährten Tools der AITECH-Community.</div>
     </div>
   </div>
 

@@ -137,7 +137,9 @@
   .m-key { font-family: var(--font-m); font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
 
   /* ── Claim ── */
-  .claim { margin-bottom: 4px; }
+  .claim { margin-bottom: 4px; display: flex; align-items: center; gap: 14px; }
+  .claim-body { flex: 1; min-width: 0; }
+  .claim-mascot { height: 118px; width: auto; flex-shrink: 0; filter: drop-shadow(0 0 18px rgba(201,242,75,0.18)); }
   .claim-eyebrow {
     font-family: var(--font-m); font-size: 9px; font-weight: 700;
     letter-spacing: 0.2em; text-transform: uppercase; color: var(--lime-text);
@@ -210,8 +212,11 @@
 
     <!-- Claim -->
     <div class="claim">
-      <div class="claim-eyebrow">Join AITECH</div>
-      <div class="claim-txt">Sonic AI — one of the proven tools used by the AITECH community.</div>
+      <div class="claim-body">
+        <div class="claim-eyebrow">Join AITECH</div>
+        <div class="claim-txt">Sonic AI — one of the proven tools used by the AITECH community.</div>
+      </div>
+      <img class="claim-mascot" src="assets/sonic-daily.png" alt="Sonic AI mascot">
     </div>
   </div>
 

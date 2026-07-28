@@ -517,6 +517,39 @@
   .x24-step h3 { margin-bottom: 8px; }
   .x24-step p { font-size: 14.5px; color: var(--muted); }
 
+  /* Rendite-Erklärung */
+  .rendite-card { margin-top: 26px; padding: 34px 36px; }
+  .rendite-card:hover { transform: none; }
+  .rendite-card h3 { margin-bottom: 10px; }
+  .rendite-card > p { font-size: 15px; color: var(--muted); max-width: 720px; }
+  .rendite-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+    margin: 22px 0 18px;
+  }
+  .rendite-step {
+    background: var(--bg-2); border: 1px solid var(--line);
+    border-radius: 14px; padding: 18px 20px;
+  }
+  .rendite-step .rs-lbl {
+    font-family: var(--font-m); font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint);
+    margin-bottom: 8px;
+  }
+  .rendite-step .rs-val { font-family: var(--font-m); font-weight: 700; font-size: 20px; }
+  .rendite-step .rs-val.lime { color: var(--lime-text); }
+  .rendite-step .rs-sub { font-size: 12.5px; color: var(--muted); margin-top: 5px; }
+  .rendite-formel {
+    font-family: var(--font-m); font-size: 14px; font-weight: 700;
+    background: var(--lime-dim); border: 1px solid rgba(201,242,75,0.3);
+    border-radius: 12px; padding: 14px 18px; display: inline-block;
+    color: var(--lime-text);
+  }
+  .rendite-note { font-size: 13.5px; color: var(--faint); margin-top: 14px; }
+  @media (max-width: 760px) {
+    .rendite-grid { grid-template-columns: 1fr; }
+    .rendite-card { padding: 26px 22px; }
+  }
+
   /* ─────────────────────────────────────────
      ONBOARDING
   ───────────────────────────────────────── */
@@ -1247,6 +1280,31 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Rendite-Erklärung -->
+    <div class="card rendite-card reveal">
+      <h3>Wie berechnet sich die <span class="accent">Tagesrendite</span>?</h3>
+      <p>Die Prozentwerte in den Daily-Ergebnissen beziehen sich auf dein <b>tatsächlich eingezahltes Kapital</b> — nicht auf den MT5-Kontostand. Dein Handelskonto ist durch das X24-System 24-mal größer als deine Einzahlung. Deshalb wird jeder Dollar Gewinn durch deine Einzahlung geteilt, nicht durch den Kontostand.</p>
+      <div class="rendite-grid">
+        <div class="rendite-step">
+          <div class="rs-lbl">Beispiel · Einzahlung</div>
+          <div class="rs-val">2.500&nbsp;$</div>
+          <div class="rs-sub">MT5-Konto: 2.500&nbsp;$ × 24 = 60.000&nbsp;$</div>
+        </div>
+        <div class="rendite-step">
+          <div class="rs-lbl">Trade-Gewinn (28.07.)</div>
+          <div class="rs-val">+19,10&nbsp;$</div>
+          <div class="rs-sub">Gold SELL · Kursbewegung nur ~0,1&nbsp;%</div>
+        </div>
+        <div class="rendite-step">
+          <div class="rs-lbl">Rendite auf echtes Kapital</div>
+          <div class="rs-val lime">+0,76&nbsp;%</div>
+          <div class="rs-sub">19,10&nbsp;$ ÷ 2.500&nbsp;$ — netto nach 70/30-Split: +0,53&nbsp;%</div>
+        </div>
+      </div>
+      <div class="rendite-formel">Rendite&nbsp;% = Trade-Gewinn&nbsp;$ ÷ (MT5-Kontostand ÷ 24)</div>
+      <p class="rendite-note">Egal ob 2.500&nbsp;$ oder 25.000&nbsp;$ Einzahlung: Das Copy-Trading skaliert alle Positionen proportional — die Prozent-Rendite ist auf jedem Konto identisch.</p>
     </div>
   </div>
 </section>

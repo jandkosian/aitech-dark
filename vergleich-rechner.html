@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AITECH – Strategie-Vergleich: Ruhend vs. Aktiv</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script>
+  try { if (localStorage.getItem('aitech-theme') === 'light') document.documentElement.classList.add('theme-light'); } catch (e) {}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #070806;
+    --bg-2:      #0b0d09;
+    --card:      #10130c;
+    --card-2:    #141810;
+    --line:      rgba(230,240,210,0.09);
+    --line-soft: rgba(230,240,210,0.05);
+    --lime:      #c9f24b;
+    --lime-soft: #a8cf3a;
+    --lime-dim:  rgba(201,242,75,0.12);
+    --gold:      #e3c26b;
+    --gold-deep: #b8964a;
+    --red:       #ff7a6b;
+    --text:      #f2f4ea;
+    --muted:     #a9b09a;
+    --faint:     #6d7462;
+    --lime-text: #c9f24b;
+    --gold-text: #e3c26b;
+    --silver:    #9fb4c8;
+    --hover-tint: rgba(230,240,210,0.06);
+    --nav-bg:    rgba(7,8,6,0.82);
+    --input-bg:  #0b0d09;
+    --radius:    22px;
+    --radius-sm: 14px;
+    --font-d:    'Space Grotesk', system-ui, sans-serif;
+    --font-b:    'Inter', system-ui, sans-serif;
+    --font-m:    'JetBrains Mono', monospace;
+  }
+  html.theme-light {
+    --bg:        #eef0ea;
+    --bg-2:      #e2e5dc;
+    --card:      #fafbf8;
+    --card-2:    #f2f4ee;
+    --line:      rgba(23,26,18,0.12);
+    --line-soft: rgba(23,26,18,0.07);
+    --lime-dim:  rgba(140,175,30,0.14);
+    --gold:      #b8944a;
+    --gold-deep: #8a6b32;
+    --red:       #d84a35;
+    --text:      #171a12;
+    --muted:     #565c4c;
+    --faint:     #7e8374;
+    --lime-text: #5f7d0d;
+    --gold-text: #8a6b32;
+    --silver:    #4f6e8a;
+    --hover-tint: rgba(23,26,18,0.05);
+    --nav-bg:    rgba(248,249,246,0.85);
+    --input-bg:  #ffffff;
+  }
+
+  html { scroll-behavior: smooth; }
+  ::selection { background: var(--lime); color: #0a0c05; }
+  body {
+    font-family: var(--font-b);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 15px;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  h1 { font-family: var(--font-d); letter-spacing: -0.02em; font-size: clamp(1.9rem, 4.5vw, 3rem); font-weight: 700; line-height: 1.1; }
+  .accent { color: var(--lime-text); }
+  .accent-gold { color: var(--gold-text); }
+
+  .label {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--lime-text);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .label::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--lime); box-shadow: 0 0 10px var(--lime);
+  }
+
+  /* ── NAV (wie Hauptseite) ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    padding: 0 28px;
+    background: var(--nav-bg);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .nav-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 76px; gap: 24px;
+  }
+  .nav-logo {
+    display: flex; align-items: center; text-decoration: none; flex-shrink: 0;
+    background: #0d0f14; padding: 4px 10px; border-radius: 8px;
+    border: 1px solid var(--line-soft);
+  }
+  .logo-img { height: 28px; display: block; }
+  .nav-links { display: flex; gap: 4px; }
+  .nav-links a {
+    padding: 9px 18px; border-radius: 100px;
+    color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500;
+    transition: color .25s, background .25s;
+  }
+  .nav-links a:hover { color: var(--text); background: var(--hover-tint); }
+  .nav-links a.active { color: var(--lime-text); background: var(--lime-dim); }
+  .nav-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .theme-toggle {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: transparent; border: 1px solid var(--line);
+    color: var(--text); cursor: pointer; padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: border-color .25s, color .25s, transform .3s cubic-bezier(.22,1,.36,1);
+  }
+  .theme-toggle:hover { border-color: var(--lime); color: var(--lime-text); transform: rotate(18deg) scale(1.06); }
+  .theme-toggle .ico-moon { display: none; }
+  html.theme-light .theme-toggle .ico-sun { display: none; }
+  html.theme-light .theme-toggle .ico-moon { display: block; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 11px 24px; border-radius: 100px;
+    font-family: var(--font-b); font-size: 14px; font-weight: 600;
+    cursor: pointer; text-decoration: none;
+    transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s;
+    border: 1px solid transparent; white-space: nowrap;
+  }
+  .btn-primary { background: var(--lime); color: #0a0c05; }
+  .btn-primary:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 12px 40px rgba(201,242,75,0.28); }
+
+  /* ── Page header ── */
+  .page-head { text-align: center; padding: 128px 0 34px; }
+  .page-head .label { margin-bottom: 16px; }
+  .page-head p { color: var(--muted); font-size: 15px; margin-top: 12px; }
+
+  .calc-tabs { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 22px 0 0; }
+  .calc-tabs a {
+    padding: 8px 18px; border-radius: 100px; font-size: 13px; font-weight: 600;
+    text-decoration: none; border: 1px solid var(--line); color: var(--muted);
+    transition: color .25s, border-color .25s, background .25s;
+    font-family: var(--font-m);
+  }
+  .calc-tabs a:hover { color: var(--text); border-color: var(--lime); }
+  .calc-tabs a.active { background: var(--lime-dim); border-color: rgba(201,242,75,0.4); color: var(--lime-text); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 18px 20px;
+    margin-bottom: 14px;
+  }
+  .card-title {
+    font-size: 11px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.12em;
+    margin-bottom: 14px; font-family: var(--font-m);
+  }
+
+  /* ── Explain card ── */
+  .explain-intro { font-size: 14px; color: var(--text); margin-bottom: 14px; }
+  .explain-intro strong { color: var(--lime-text); }
+  .explain-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .explain-item {
+    background: var(--bg-2); border: 1px solid var(--line);
+    border-radius: 10px; padding: 13px 15px;
+  }
+  .explain-item.ruhend { border-left: 3px solid var(--silver); }
+  .explain-item.aktiv  { border-left: 3px solid var(--lime); }
+  .explain-h {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; font-family: var(--font-m); margin-bottom: 7px;
+  }
+  .explain-item.ruhend .explain-h { color: var(--silver); }
+  .explain-item.aktiv .explain-h  { color: var(--lime-text); }
+  .explain-item p { font-size: 13px; color: var(--muted); line-height: 1.65; }
+  .explain-item p strong { color: var(--text); font-weight: 600; }
+  @media (max-width: 860px) {
+    .explain-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ── Controls ── */
+  .ctl-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
+  .ctl-row:last-child { margin-bottom: 0; }
+  .ctl-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; font-family: var(--font-m); width: 150px; flex-shrink: 0; }
+  .ctl-range { flex: 1; min-width: 120px; accent-color: var(--lime); }
+  .ctl-inp {
+    width: 84px; background: var(--input-bg);
+    border: 1px solid var(--line); border-radius: 8px;
+    padding: 7px 8px; color: var(--text);
+    font-size: 13px; font-weight: 600; font-family: var(--font-m);
+    outline: none; -moz-appearance: textfield; text-align: center;
+  }
+  .ctl-inp::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .ctl-inp:focus { border-color: var(--lime); }
+  .ctl-unit { font-size: 11px; color: var(--muted); width: 42px; flex-shrink: 0; }
+
+  .preset-row { display: flex; gap: 8px; flex-wrap: wrap; margin: -6px 0 16px 164px; }
+  .preset {
+    padding: 5px 12px; border-radius: 100px; font-size: 11px; font-weight: 600;
+    font-family: var(--font-m); cursor: pointer;
+    background: transparent; border: 1px solid var(--line); color: var(--muted);
+    transition: color .2s, border-color .2s, background .2s;
+  }
+  .preset:hover { color: var(--text); border-color: var(--lime); }
+  .preset.on { background: var(--lime-dim); border-color: rgba(201,242,75,0.4); color: var(--lime-text); }
+
+  /* ── Faktor banner ── */
+  .factor-banner {
+    background: linear-gradient(135deg, rgba(227,194,107,0.10), rgba(201,242,75,0.07));
+    border: 1px solid rgba(227,194,107,0.35);
+    border-radius: var(--radius-sm);
+    padding: 18px 22px; margin-bottom: 14px;
+    display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  }
+  .factor-num {
+    font-family: var(--font-m); font-weight: 700; color: var(--gold-text);
+    font-size: clamp(1.7rem, 4vw, 2.4rem); line-height: 1; white-space: nowrap;
+  }
+  .factor-txt { font-size: 13px; color: var(--muted); flex: 1; min-width: 200px; }
+  .factor-txt strong { color: var(--text); }
+
+  /* ── Duo result cards ── */
+  .duo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .duo-card {
+    background: var(--card); border-radius: var(--radius-sm); overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  .duo-card.ruhend { border-color: rgba(159,180,200,0.35); }
+  .duo-card.aktiv  { border-color: rgba(201,242,75,0.4); }
+  .duo-head {
+    padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--line);
+  }
+  .duo-card.ruhend .duo-head { background: rgba(159,180,200,0.07); }
+  .duo-card.aktiv .duo-head  { background: rgba(201,242,75,0.07); }
+  .duo-name { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; font-family: var(--font-m); }
+  .duo-card.ruhend .duo-name { color: var(--silver); }
+  .duo-card.aktiv .duo-name  { color: var(--lime-text); }
+  .duo-tag {
+    font-size: 9px; padding: 3px 8px; border-radius: 100px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.06em; font-family: var(--font-m);
+  }
+  .duo-card.ruhend .duo-tag { background: rgba(159,180,200,0.14); color: var(--silver); }
+  .duo-card.aktiv .duo-tag  { background: var(--lime-dim); color: var(--lime-text); }
+  .duo-body { padding: 16px; }
+  .duo-big { font-size: clamp(1.35rem, 3vw, 1.8rem); font-weight: 700; font-family: var(--font-m); line-height: 1.1; }
+  .duo-card.ruhend .duo-big { color: var(--silver); }
+  .duo-card.aktiv .duo-big  { color: var(--lime-text); }
+  .duo-big-sub { font-size: 11px; color: var(--muted); margin: 4px 0 12px; }
+  .duo-stats { padding-top: 12px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 6px; }
+  .sr { display: flex; justify-content: space-between; align-items: baseline; }
+  .sr-k { font-size: 10px; color: var(--muted); }
+  .sr-v { font-size: 12px; font-weight: 700; font-family: var(--font-m); }
+
+  .chart-wrap { position: relative; height: 300px; }
+
+  /* ── Table ── */
+  .tw { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th {
+    text-align: left; padding: 8px 10px; color: var(--muted);
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--line); white-space: nowrap; font-family: var(--font-m);
+  }
+  td { padding: 9px 10px; border-bottom: 1px solid var(--line-soft); white-space: nowrap; font-family: var(--font-m); }
+  tr:last-child td { border-bottom: none; }
+  tr.hlr td { background: var(--lime-dim); }
+
+  .page-foot { text-align: center; font-size: 11px; color: var(--faint); padding: 24px 0 12px; }
+
+  /* ── Footer ── */
+  footer { border-top: 1px solid var(--line-soft); padding: 34px 24px 40px; text-align: center; margin-top: 40px; }
+  .logo-mark { font-family: var(--font-d); font-weight: 700; font-size: 20px; letter-spacing: -0.01em; display: inline-flex; gap: 2px; }
+  .logo-mark .ai { color: var(--lime-text); text-shadow: 0 0 24px rgba(201,242,75,0.5); }
+  .logo-mark .tech { color: var(--text); }
+  .footer-copy { font-size: 12px; color: var(--faint); margin-top: 12px; line-height: 1.7; }
+
+  /* ── Responsive ── */
+  @media (max-width: 860px) {
+    .duo-grid { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+    .chart-wrap { height: 220px; }
+    table { min-width: 480px; }
+    .ctl-lbl { width: 100%; }
+    .preset-row { margin-left: 0; }
+    .ctl-inp { padding: 9px 10px; font-size: 15px; }
+  }
+  @media (max-width: 560px) {
+    nav { padding: 0 12px; }
+    .nav-inner { height: 62px; gap: 10px; }
+    .nav-logo { padding: 3px 8px; }
+    .logo-img { height: 22px; }
+    .nav-right { gap: 8px; }
+    .theme-toggle { width: 36px; height: 36px; }
+    .nav-right .btn { padding: 9px 14px; font-size: 13px; white-space: nowrap; }
+    .page-head { padding-top: 106px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══ -->
+<nav id="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo" aria-label="AITECH">
+      <img src="assets/aitech-logo.jpg" alt="AITECH" class="logo-img">
+    </a>
+    <div class="nav-links">
+      <a href="multi-rechner.html">Multi-Konto-Rechner</a>
+      <a href="affiliate-rechner.html">Affiliate-Rechner</a>
+      <a href="vergleich-rechner.html" class="active">Strategie-Vergleich</a>
+    </div>
+    <div class="nav-right">
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Zwischen hellem und dunklem Design wechseln" title="Design wechseln">
+        <svg class="ico-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="ico-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <a href="index.html#jetzt-starten" class="btn btn-primary">Account erstellen</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- ═══ PAGE HEAD ═══ -->
+  <div class="page-head">
+    <div class="label">Rechner · Modellrechnung</div>
+    <h1>Ruhend vs. <span class="accent">Aktiv</span></h1>
+    <p>Was macht die Community-Strategie aus? Gleicher Betrag, gleiche Strategie — nur einmal ruhend und einmal mit täglichem 24×-Reinvest.</p>
+    <div class="calc-tabs">
+      <a href="index.html">← Übersicht</a>
+      <a href="multi-rechner.html">📈 Multi-Konto</a>
+      <a href="affiliate-rechner.html">🤝 Affiliate</a>
+      <a href="vergleich-rechner.html" class="active">⚖️ Vergleich</a>
+    </div>
+  </div>
+
+  <!-- So funktioniert der Vergleich -->
+  <div class="card explain-card">
+    <div class="card-title">💡 Worin liegt der Unterschied?</div>
+    <p class="explain-intro">Beide Konten starten mit derselben Einzahlung und derselben Handelsstrategie. Der einzige Unterschied ist, <strong>was mit den täglichen Gewinnen passiert</strong>.</p>
+    <div class="explain-grid">
+      <div class="explain-item ruhend">
+        <div class="explain-h">🛌 Ruhend — wie das Referenzkonto</div>
+        <p>Die Gewinne <strong>bleiben einfach auf dem Konto liegen</strong> — genau wie auf unserem MyFXBook-Referenzkonto. Das Konto wächst nur mit der Basis-Tagesrendite. Vorteil: Die 30-Tage-Haltedauer läuft normal ab, danach ist das Kapital frei verfügbar.</p>
+      </div>
+      <div class="explain-item aktiv">
+        <div class="explain-h">⚡ Aktiv — Community-Strategie</div>
+        <p>Die Gewinne werden <strong>täglich entnommen und sofort wieder eingezahlt</strong> — jede Wiedereinzahlung wird mit <strong>24×</strong> dem Konto zugeführt. Aus der Basis-Tagesrendite wird so das 24-Fache pro Tag. Wichtig: Jede Einzahlung setzt die 30-Tage-Haltedauer zurück — das Kapital bleibt gebunden.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="card">
+    <div class="card-title">🎛 Deine Werte</div>
+    <div class="ctl-row">
+      <span class="ctl-lbl">Einzahlung (echt)</span>
+      <input type="range" id="sldDep" class="ctl-range" min="250" max="25000" step="250" value="1000">
+      <input type="number" id="inpDep" class="ctl-inp" value="1000" min="100" step="100">
+      <span class="ctl-unit">$</span>
+    </div>
+    <div class="ctl-row" style="margin-bottom:10px;">
+      <span class="ctl-lbl">Ø Tagesrendite (Basis)</span>
+      <input type="range" id="sldRt" class="ctl-range" min="0.01" max="0.20" step="0.01" value="0.05">
+      <input type="number" id="inpRt" class="ctl-inp" value="0.05" min="0.01" max="1" step="0.01">
+      <span class="ctl-unit">%/Tag</span>
+    </div>
+    <div class="preset-row">
+      <button type="button" class="preset" data-v="0.03">konservativ 0,03%</button>
+      <button type="button" class="preset on" data-v="0.05">Referenzkonto ~0,05%</button>
+      <button type="button" class="preset" data-v="0.10">optimistisch 0,10%</button>
+    </div>
+    <div class="ctl-row">
+      <span class="ctl-lbl">Laufzeit</span>
+      <input type="range" id="sldM" class="ctl-range" min="1" max="24" step="1" value="12">
+      <input type="number" id="inpM" class="ctl-inp" value="12" min="1" max="24">
+      <span class="ctl-unit">Mon.</span>
+    </div>
+  </div>
+
+  <!-- Faktor banner -->
+  <div class="factor-banner">
+    <div class="factor-num" id="facNum">—</div>
+    <div class="factor-txt" id="facTxt">…</div>
+  </div>
+
+  <!-- Duo results -->
+  <div class="duo-grid">
+    <div class="duo-card ruhend">
+      <div class="duo-head">
+        <span class="duo-name">🛌 Ruhend</span>
+        <span class="duo-tag">wie Referenzkonto</span>
+      </div>
+      <div class="duo-body">
+        <div class="duo-big" id="rEnd">—</div>
+        <div class="duo-big-sub">Kontostand (MT5) nach <span class="nMon">12</span> Monaten · = <span id="rEndReal">—</span> echtes Kapital</div>
+        <div class="duo-stats">
+          <div class="sr"><span class="sr-k">Start (MT5 = Einzahlung × 24)</span><span class="sr-v" id="rStart" style="color:var(--muted);">—</span></div>
+          <div class="sr"><span class="sr-k">Gewinn gesamt (MT5)</span><span class="sr-v" id="rGain" style="color:var(--silver);">—</span></div>
+          <div class="sr"><span class="sr-k">Gesamt-Rendite</span><span class="sr-v" id="rPct" style="color:var(--silver);">—</span></div>
+          <div class="sr"><span class="sr-k">Effektive Tagesrendite</span><span class="sr-v" id="rDay" style="color:var(--muted);">—</span></div>
+          <div class="sr"><span class="sr-k">Kapital nach 30 Tagen</span><span class="sr-v" style="color:var(--lime-text);">frei verfügbar</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="duo-card aktiv">
+      <div class="duo-head">
+        <span class="duo-name">⚡ Aktiv</span>
+        <span class="duo-tag">24×-Reinvest täglich</span>
+      </div>
+      <div class="duo-body">
+        <div class="duo-big" id="aEnd">—</div>
+        <div class="duo-big-sub">Kontostand (MT5) nach <span class="nMon">12</span> Monaten · = <span id="aEndReal">—</span> echtes Kapital</div>
+        <div class="duo-stats">
+          <div class="sr"><span class="sr-k">Start (MT5 = Einzahlung × 24)</span><span class="sr-v" id="aStart" style="color:var(--muted);">—</span></div>
+          <div class="sr"><span class="sr-k">Gewinn gesamt (MT5)</span><span class="sr-v" id="aGain" style="color:var(--lime-text);">—</span></div>
+          <div class="sr"><span class="sr-k">Gesamt-Rendite</span><span class="sr-v" id="aPct" style="color:var(--lime-text);">—</span></div>
+          <div class="sr"><span class="sr-k">Effektive Tagesrendite (24×)</span><span class="sr-v" id="aDay" style="color:var(--gold-text);">—</span></div>
+          <div class="sr"><span class="sr-k">Kapital während Reinvest</span><span class="sr-v" style="color:var(--gold-text);">gebunden</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart -->
+  <div class="card">
+    <div class="card-title">📈 Kontoentwicklung im Vergleich (MT5)</div>
+    <div class="chart-wrap"><canvas id="myChart"></canvas></div>
+  </div>
+
+  <!-- Table -->
+  <div class="card">
+    <div class="card-title">📋 Monat für Monat</div>
+    <div class="tw">
+      <table>
+        <thead>
+          <tr>
+            <th>Monat</th>
+            <th>🛌 Ruhend (MT5)</th>
+            <th>⚡ Aktiv (MT5)</th>
+            <th>Vorsprung</th>
+            <th>Faktor</th>
+          </tr>
+        </thead>
+        <tbody id="tBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="page-foot">
+    Modellrechnung mit konstanter Ø-Tagesrendite und 21 Handelstagen/Monat — vergangene Performance ≠ zukünftige Ergebnisse · SONIC AI MyFXBook #12076857
+  </div>
+
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <span class="logo-mark"><span class="ai">AI</span><span class="tech">TECH</span></span>
+  <p class="footer-copy">Verifiziert auf MyFXBook · FSC Mauritius · © 2026 AITECH<br>Trading ist generell mit Risiken verbunden – ein Totalverlust Deiner Einlage ist grundsätzlich möglich.</p>
+</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+const fmtK = v => '$' + Math.round(v).toLocaleString('de-DE');
+const fmtP = v => (v * 100).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
+
+const LEV = 24;   // Einzahlungs-Multiplikator
+const TD  = 21;   // Handelstage pro Monat
+
+let ch = null;
+
+/* ── Theme toggle ── */
+document.getElementById('theme-toggle').addEventListener('click', function () {
+  var light = document.documentElement.classList.toggle('theme-light');
+  try { localStorage.setItem('aitech-theme', light ? 'light' : 'dark'); } catch (e) {}
+  recalc(); // Chart mit neuen Theme-Farben neu zeichnen
+});
+
+/* ── Theme-abhängige Chart-Farben ── */
+function chartColors() {
+  const cs = getComputedStyle(document.documentElement);
+  const light = document.documentElement.classList.contains('theme-light');
+  return {
+    lime:   cs.getPropertyValue('--lime-text').trim(),
+    gold:   cs.getPropertyValue('--gold-text').trim(),
+    silver: cs.getPropertyValue('--silver').trim(),
+    muted:  cs.getPropertyValue('--muted').trim(),
+    faint:  cs.getPropertyValue('--faint').trim(),
+    grid:   light ? 'rgba(23,26,18,0.08)' : 'rgba(230,240,210,0.07)',
+    tipBg:  light ? '#ffffff' : '#10130c',
+    tipBd:  light ? 'rgba(23,26,18,0.15)' : 'rgba(230,240,210,0.15)',
+    tipTx:  light ? '#171a12' : '#f2f4ea',
+    fill:   light ? 'rgba(140,175,30,0.08)' : 'rgba(201,242,75,0.06)'
+  };
+}
+
+/* ── Wire inputs ── */
+[['sldDep','inpDep'],['sldRt','inpRt'],['sldM','inpM']].forEach(([s,i]) => {
+  $(s).addEventListener('input', () => { $(i).value = $(s).value; syncPresets(); recalc(); });
+  $(i).addEventListener('input', () => { $(s).value = $(i).value; syncPresets(); recalc(); });
+});
+document.querySelectorAll('.preset').forEach(btn => {
+  btn.addEventListener('click', () => {
+    $('inpRt').value = btn.dataset.v;
+    $('sldRt').value = btn.dataset.v;
+    syncPresets();
+    recalc();
+  });
+});
+function syncPresets() {
+  const v = parseFloat($('inpRt').value);
+  document.querySelectorAll('.preset').forEach(b => b.classList.toggle('on', parseFloat(b.dataset.v) === v));
+}
+
+/* ── Core compute ── */
+function compute() {
+  const dep = Math.max(100, parseFloat($('inpDep').value) || 1000);
+  const r   = Math.max(0.0001, parseFloat($('inpRt').value) || 0.05) / 100;
+  const N   = Math.min(24, Math.max(1, parseInt($('inpM').value) || 12));
+
+  const M0 = dep * LEV;
+  const ruh = [], akt = [];
+  for (let m = 0; m <= N; m++) {
+    const n = m * TD;
+    ruh.push(M0 * Math.pow(1 + r, n));
+    akt.push(M0 * Math.pow(1 + LEV * r, n));
+  }
+  return { dep, r, N, M0, ruh, akt };
+}
+
+/* ── Render ── */
+function render(d) {
+  const rEnd = d.ruh[d.N], aEnd = d.akt[d.N];
+  const fac  = aEnd / rEnd;
+
+  document.querySelectorAll('.nMon').forEach(el => el.textContent = d.N);
+
+  $('rEnd').textContent     = fmtK(rEnd);
+  $('rEndReal').textContent = fmtK(rEnd / LEV);
+  $('rStart').textContent   = fmtK(d.M0);
+  $('rGain').textContent    = '+' + fmtK(rEnd - d.M0);
+  $('rPct').textContent     = '+' + fmtP(rEnd / d.M0 - 1);
+  $('rDay').textContent     = fmtP(d.r);
+
+  $('aEnd').textContent     = fmtK(aEnd);
+  $('aEndReal').textContent = fmtK(aEnd / LEV);
+  $('aStart').textContent   = fmtK(d.M0);
+  $('aGain').textContent    = '+' + fmtK(aEnd - d.M0);
+  $('aPct').textContent     = '+' + fmtP(aEnd / d.M0 - 1);
+  $('aDay').textContent     = '~' + fmtP(LEV * d.r);
+
+  const facStr = fac >= 100 ? Math.round(fac).toLocaleString('de-DE')
+               : fac.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  $('facNum').textContent = '×' + facStr;
+  $('facTxt').innerHTML = `Nach <strong>${d.N} Monaten</strong> steht das aktive Konto <strong>${facStr}-fach höher</strong> als das ruhende — bei identischer Einzahlung von <strong>${fmtK(d.dep)}</strong> und identischer Basis-Rendite von <strong>${fmtP(d.r)}</strong> pro Handelstag. Der gesamte Unterschied entsteht allein durch das tägliche Reinvestieren mit 24×.`;
+}
+
+/* ── Chart ── */
+function renderChart(d) {
+  const labels = Array.from({ length: d.N + 1 }, (_, i) => i === 0 ? 'Start' : `M${i}`);
+  const c = chartColors();
+  if (ch) ch.destroy();
+
+  try { ch = new Chart($('myChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: '🛌 Ruhend',
+          data: d.ruh,
+          borderColor: c.silver,
+          borderWidth: 2,
+          borderDash: [6, 4],
+          fill: false, tension: 0.3,
+          pointRadius: 0,
+        },
+        {
+          label: '⚡ Aktiv (24×-Reinvest)',
+          data: d.akt,
+          borderColor: c.lime,
+          backgroundColor: c.fill,
+          borderWidth: 2.5,
+          fill: true, tension: 0.3,
+          pointRadius: 0,
+        },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { labels: { color: c.muted, font: { size: 11 }, boxWidth: 18, padding: 12 } },
+        tooltip: {
+          backgroundColor: c.tipBg, borderColor: c.tipBd, borderWidth: 1,
+          titleColor: c.tipTx, bodyColor: c.muted, padding: 10,
+          callbacks: { label: ctx => ` ${ctx.dataset.label}: ${fmtK(ctx.parsed.y)}` }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: c.muted, font: { size: 9 }, maxTicksLimit: 13 },
+          grid:  { color: c.grid }
+        },
+        y: {
+          type: 'linear',
+          ticks: {
+            color: c.muted, font: { size: 9 },
+            callback: v => v >= 1e6 ? '$' + (v / 1e6).toFixed(1) + 'M' : v >= 1000 ? '$' + Math.round(v / 1000) + 'k' : '$' + v
+          },
+          grid: { color: c.grid }
+        }
+      }
+    }
+  }); } catch (e) { console.warn('Chart init error:', e); }
+}
+
+/* ── Table ── */
+function renderTable(d) {
+  const keys = new Set([0, 1, 2, 3, 6, 9, 12, 15, 18, 21, 24, d.N]);
+  const rows = [...keys].filter(m => m <= d.N).sort((a, b) => a - b);
+
+  $('tBody').innerHTML = rows.map(m => {
+    const r = d.ruh[m], a = d.akt[m];
+    const fac = a / r;
+    const facStr = fac >= 100 ? '×' + Math.round(fac).toLocaleString('de-DE')
+                 : '×' + fac.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const hl = m === d.N && m > 0;
+    return `<tr class="${hl ? 'hlr' : ''}">
+      <td style="color:var(--muted)">${m === 0 ? 'Start' : 'M' + m}</td>
+      <td style="color:var(--silver)">${fmtK(r)}</td>
+      <td style="color:var(--lime-text);font-weight:600">${fmtK(a)}</td>
+      <td style="color:${a - r > 1 ? 'var(--gold-text)' : 'var(--muted)'}">${a - r > 1 ? '+' + fmtK(a - r) : '—'}</td>
+      <td style="color:var(--gold-text);font-weight:600">${m === 0 ? '—' : facStr}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── Recalc ── */
+function recalc() {
+  const d = compute();
+  render(d);
+  renderChart(d);
+  renderTable(d);
+}
+
+recalc();
+</script>
+</body>
+</html>

@@ -1468,11 +1468,31 @@ function toggleWeek(btn) {
   (function initHeroVideo() {
     var video = document.getElementById('hero-video');
     if (!video) return;
-    if (reducedMotion) { video.removeAttribute('autoplay'); video.pause(); return; }
+    // Muted muss vor play() auch per Property gesetzt sein — manche Browser
+    // ignorieren sonst das HTML-Attribut und blockieren Autoplay
+    video.muted = true; video.defaultMuted = true;
+    video.setAttribute('muted', '');
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
     // Fällt das Video weg (Datei fehlt/Fehler), bleibt das Poster-Bild sichtbar
     video.addEventListener('error', function () { video.load(); }, true);
-    var p = video.play();
-    if (p && p.catch) p.catch(function () { /* Autoplay blockiert → Poster bleibt */ });
+    function tryPlay() {
+      var p = video.play();
+      if (p && p.catch) p.catch(function () { /* wird bei Interaktion erneut versucht */ });
+    }
+    tryPlay();
+    // Fallback: blockiert der Browser Autoplay (z. B. iOS-Stromsparmodus),
+    // startet das Video bei der ersten Interaktion
+    ['touchstart', 'click', 'scroll'].forEach(function (ev) {
+      window.addEventListener(ev, function h() {
+        if (video.paused) tryPlay();
+        window.removeEventListener(ev, h);
+      }, { once: true, passive: true });
+    });
+    // Nach Tab-Wechsel weiterlaufen lassen
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden && video.paused) tryPlay();
+    });
   })();
 
   /* ───────────── Forex-Ticker (nahtloser Marquee) ───────────── */

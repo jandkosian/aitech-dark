@@ -579,7 +579,11 @@
   .sonic-x24     { right: 3vw; top: 108px;   width: clamp(100px, 11vw, 160px); }
   .sonic-perf    { right: 4vw; top: 90px;    width: clamp(110px, 12vw, 170px); }
   .sonic-cta     { right: -8px; bottom: 36px; width: clamp(110px, 12vw, 160px); z-index: 3; }
-  @media (max-width: 1000px) { .sonic-spot { display: none; } }
+  @media (max-width: 1000px) {
+    .sonic-rechner, .sonic-x24, .sonic-perf { display: none; }
+    .sonic-hero { right: 14px; bottom: -8px; width: 92px; }
+    .sonic-cta  { right: -6px; bottom: 12px; width: 86px; }
+  }
   @media (prefers-reduced-motion: reduce) { .sonic-bob, .sonic-spot.spin { animation: none; } }
 
   /* ─────────────────────────────────────────

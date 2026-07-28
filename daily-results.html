@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AITECH – Daily Trading Results</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #070806;
+    --bg-2:      #0b0d09;
+    --card:      #10130c;
+    --card-2:    #141810;
+    --line:      rgba(230,240,210,0.09);
+    --line-soft: rgba(230,240,210,0.05);
+    --lime:      #c9f24b;
+    --lime-dim:  rgba(201,242,75,0.12);
+    --gold:      #e3c26b;
+    --red:       #ff7a6b;
+    --text:      #f2f4ea;
+    --muted:     #a9b09a;
+    --faint:     #6d7462;
+    --lime-text: #c9f24b;
+    --gold-text: #e3c26b;
+    --silver:    #9fb4c8;
+    --font-d:    'Space Grotesk', system-ui, sans-serif;
+    --font-b:    'Inter', system-ui, sans-serif;
+    --font-m:    'JetBrains Mono', monospace;
+  }
+
+  body {
+    font-family: var(--font-b);
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    display: flex; justify-content: center;
+    padding: 28px 14px;
+  }
+
+  /* ═══ CARD ═══ */
+  .result-card {
+    width: 100%; max-width: 620px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    overflow: hidden;
+  }
+  .card-inner { padding: 30px 30px 22px; }
+
+  /* ── Head ── */
+  .head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px; }
+  .brand { display: inline-flex; align-items: center; gap: 9px; }
+  .brand-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 12px var(--lime); }
+  .brand-name { font-family: var(--font-m); font-size: 12px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; }
+  .head-date { font-family: var(--font-m); font-size: 11px; letter-spacing: 0.18em; color: var(--faint); text-transform: uppercase; }
+
+  /* ── Title ── */
+  .title-block { text-align: center; margin-bottom: 8px; }
+  h1 {
+    font-family: var(--font-d); font-weight: 700; letter-spacing: -0.01em;
+    font-size: clamp(1.25rem, 4.6vw, 1.7rem); line-height: 1.2;
+  }
+  h1 .date { color: var(--lime-text); }
+  .symbol { font-family: var(--font-m); font-weight: 700; font-size: 16px; letter-spacing: 0.14em; margin-top: 6px; }
+  .strategy {
+    font-family: var(--font-m); font-size: 10px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--faint); margin-top: 6px;
+  }
+  .strategy b { color: var(--lime-text); font-weight: 700; }
+
+  /* ── Big number ── */
+  .big-wrap { text-align: center; margin: 14px 0 6px; }
+  .big {
+    font-family: var(--font-d); font-weight: 700;
+    font-size: clamp(4rem, 17vw, 6.6rem); line-height: 1;
+    color: var(--lime-text); letter-spacing: -0.03em;
+    text-shadow: 0 0 60px rgba(201,242,75,0.25);
+  }
+  .big-sub { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+  /* ── Chips ── */
+  .chips { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 18px 0 22px; }
+  .chip {
+    font-family: var(--font-m); font-size: 10px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 7px 14px; border-radius: 100px;
+    display: inline-flex; align-items: center; gap: 7px;
+    border: 1px solid var(--line);
+  }
+  .chip::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+  .chip.share  { background: var(--lime-dim); color: var(--lime-text); border-color: rgba(201,242,75,0.35); }
+  .chip.share::before { background: var(--lime); }
+  .chip.comm   { background: rgba(227,194,107,0.1); color: var(--gold-text); border-color: rgba(227,194,107,0.35); }
+  .chip.comm::before { background: var(--gold); }
+  .chip.amp    { background: rgba(159,180,200,0.08); color: var(--silver); border-color: rgba(159,180,200,0.3); }
+  .chip.amp::before { background: var(--silver); }
+
+  /* ── Trades ── */
+  .trades {
+    background: var(--bg-2); border: 1px solid var(--line);
+    border-radius: 14px; overflow: hidden; margin-bottom: 14px;
+  }
+  .trade {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 16px; font-family: var(--font-m); font-size: 13px;
+  }
+  .trade + .trade { border-top: 1px solid var(--line-soft); }
+  .t-time { color: var(--faint); font-size: 11px; white-space: nowrap; }
+  .t-side {
+    font-size: 9px; font-weight: 700; letter-spacing: 0.08em;
+    background: var(--lime); color: #0a0c05;
+    padding: 3px 9px; border-radius: 6px; flex-shrink: 0;
+  }
+  .t-side.sell { background: var(--red); color: #140604; }
+  .t-px { color: var(--muted); font-size: 12px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .t-px b { color: var(--text); font-weight: 500; }
+  .t-res { font-weight: 700; color: var(--lime-text); margin-left: auto; white-space: nowrap; }
+  .t-res.neg { color: var(--red); }
+
+  /* ── Monthly ── */
+  .month {
+    background: var(--lime-dim); border: 1px solid rgba(201,242,75,0.3);
+    border-radius: 14px; padding: 14px 18px 16px; margin-bottom: 20px;
+  }
+  .month-lbl {
+    font-family: var(--font-m); font-size: 10px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--lime-text);
+    margin-bottom: 10px;
+  }
+  .month-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; text-align: center; }
+  .m-val { font-family: var(--font-m); font-weight: 700; font-size: clamp(0.95rem, 3.4vw, 1.25rem); }
+  .m-val.lime { color: var(--lime-text); }
+  .m-key { font-family: var(--font-m); font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
+
+  /* ── Claim ── */
+  .claim { margin-bottom: 4px; }
+  .claim-eyebrow {
+    font-family: var(--font-m); font-size: 9px; font-weight: 700;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--lime-text);
+    margin-bottom: 5px;
+  }
+  .claim-txt { font-size: 14px; font-weight: 600; line-height: 1.45; }
+
+  /* ── Risk ── */
+  .risk {
+    background: var(--bg-2); border-top: 1px solid var(--line-soft);
+    padding: 14px 30px; text-align: center;
+  }
+  .risk-t { font-family: var(--font-m); font-size: 8.5px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+  .risk p { font-size: 8.5px; line-height: 1.6; color: var(--faint); }
+
+  /* ── Bottom bar ── */
+  .bar {
+    background: var(--lime); text-align: center; padding: 13px;
+    font-family: var(--font-d); font-weight: 700; font-size: 18px;
+    letter-spacing: 0.02em; color: #0a0c05;
+  }
+
+  @media (max-width: 480px) {
+    body { padding: 14px 8px; }
+    .card-inner { padding: 22px 18px 16px; }
+    .risk { padding: 12px 18px; }
+    .t-px { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="result-card" id="card">
+
+  <div class="card-inner">
+    <!-- Head -->
+    <div class="head">
+      <span class="brand"><span class="brand-dot"></span><span class="brand-name">Sonic&nbsp;AI</span></span>
+      <span class="head-date" id="dateShort"></span>
+    </div>
+
+    <!-- Title -->
+    <div class="title-block">
+      <h1>DAILY TRADING RESULTS · <span class="date" id="dateLong"></span></h1>
+      <div class="symbol" id="symbol"></div>
+      <div class="strategy">COPYX · STRATEGY <b>SONIC</b></div>
+    </div>
+
+    <!-- Big number -->
+    <div class="big-wrap">
+      <div class="big" id="gross"></div>
+      <div class="big-sub">Daily result · gross (before fees &amp; 30% community split)</div>
+    </div>
+
+    <!-- Chips -->
+    <div class="chips">
+      <span class="chip share">Your Share · 70%</span>
+      <span class="chip comm">Community · 30%</span>
+      <span class="chip amp">Amplify · 24×</span>
+    </div>
+
+    <!-- Trades -->
+    <div class="trades" id="trades"></div>
+
+    <!-- Monthly -->
+    <div class="month">
+      <div class="month-lbl" id="monthLbl"></div>
+      <div class="month-grid" id="monthGrid"></div>
+    </div>
+
+    <!-- Claim -->
+    <div class="claim">
+      <div class="claim-eyebrow">Join AITECH</div>
+      <div class="claim-txt">Sonic AI — one of the proven tools used by the AITECH community.</div>
+    </div>
+  </div>
+
+  <!-- Risk notice -->
+  <div class="risk">
+    <div class="risk-t">Risk Notice</div>
+    <p>Percentages shown are gross historical trade results before fees and the 70/30 community split; your actual profit is typically lower and may differ from live broker data due to spreads, execution and account settings. Trading leveraged instruments involves significant risk of loss. AITECH does not execute trades, manage client funds or provide investment advice; all trading services are provided by licensed third-party partners. Past performance does not guarantee future results; this card is for information purposes only.</p>
+  </div>
+
+  <!-- Bottom bar -->
+  <div class="bar"><span style="letter-spacing:0.01em;">AI</span>TECH</div>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   TEMPLATE-DATEN — für neue Karte nur diesen
+   Block anpassen, Rest rendert automatisch.
+   ═══════════════════════════════════════════════ */
+const DATA = {
+  dateLong:  '27.07.2026',
+  dateShort: '27 JUL 2026',
+  symbol:    'XAUUSD',
+  gross:     '+2.73%',
+  trades: [
+    { time: '04:18 → 05:11', side: 'BUY', from: '4087.56', to: '4093.24', res: '+1.03%' },
+    { time: '13:33 → 13:45', side: 'BUY', from: '4078.44', to: '4087.83', res: '+1.71%' },
+  ],
+  month: {
+    label:   'Monthly Performance · Jul 2026',
+    gross:   '+22.54%',
+    trades:  '33',
+    winrate: '84.85%',
+    wl:      '28 / 5',
+  },
+};
+
+/* ── Render ── */
+const $ = id => document.getElementById(id);
+$('dateLong').textContent  = DATA.dateLong;
+$('dateShort').textContent = DATA.dateShort;
+$('symbol').textContent    = DATA.symbol;
+$('gross').textContent     = DATA.gross;
+
+$('trades').innerHTML = DATA.trades.map(t => `
+  <div class="trade">
+    <span class="t-time">${t.time}</span>
+    <span class="t-side ${t.side === 'SELL' ? 'sell' : ''}">${t.side}</span>
+    <span class="t-px"><b>${t.from}</b> → <b>${t.to}</b></span>
+    <span class="t-res ${t.res.startsWith('-') ? 'neg' : ''}">${t.res}</span>
+  </div>`).join('');
+
+$('monthLbl').textContent = DATA.month.label;
+$('monthGrid').innerHTML = `
+  <div><div class="m-val lime">${DATA.month.gross}</div><div class="m-key">Gross</div></div>
+  <div><div class="m-val">${DATA.month.trades}</div><div class="m-key">Trades</div></div>
+  <div><div class="m-val">${DATA.month.winrate}</div><div class="m-key">Win Rate</div></div>
+  <div><div class="m-val">${DATA.month.wl}</div><div class="m-key">W / L</div></div>`;
+</script>
+</body>
+</html>

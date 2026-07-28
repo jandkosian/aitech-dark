@@ -1,0 +1,35 @@
+name: Deploy to mysonic.ai
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Manueller Trigger über GitHub-UI
+
+jobs:
+  deploy:
+    name: FTP Deploy → Hostinger
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # Für Sync-Erkennung (geänderte Dateien)
+
+      - name: 🚀 Deploy via FTP to mysonic.ai
+        uses: SamKirkland/FTP-Deploy-Action@4.3.5
+        with:
+          server: 82.25.96.172
+          username: u848773950
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          server-dir: /home/u848773950/domains/mysonic.ai/public_html/
+          local-dir: ./
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/README.md
+            **/.gitignore
+            **/.github/**
